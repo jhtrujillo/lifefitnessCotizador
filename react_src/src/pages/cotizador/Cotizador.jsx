@@ -653,7 +653,7 @@ export default function Cotizador() {
   const seriesOptions = Array.from(new Set(productsList.map(p => p.series).filter(Boolean)));
   const pQuery = productSearchQuery.toLowerCase().trim();
   const filteredProducts = productsList.filter(p => {
-    const matchesQuery = pQuery.length === 0 || p.name.toLowerCase().includes(pQuery) || (p.series && p.series.toLowerCase().includes(pQuery));
+    const matchesQuery = pQuery.length === 0 || (p.name || "").toString().toLowerCase().includes(pQuery) || (p.series && p.series.toLowerCase().includes(pQuery));
     const matchesSeries = !selectedSeries || p.series === selectedSeries;
     return matchesQuery && matchesSeries;
   });
@@ -662,7 +662,7 @@ export default function Cotizador() {
   const cQuery = clientSearchQuery.toLowerCase().trim();
   const filteredClients = cQuery.length === 0 
     ? clientsList 
-    : clientsList.filter(c => c.nombre.toLowerCase().includes(cQuery) || c.identificacion.toLowerCase().includes(cQuery));
+    : clientsList.filter(c => (c.nombre || "").toString().toLowerCase().includes(cQuery) || (c.identificacion || "").toString().toLowerCase().includes(cQuery));
 
   return (
     <AuthBoundary>
