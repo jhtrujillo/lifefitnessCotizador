@@ -544,6 +544,12 @@ export default function Cotizador() {
     setShowProductSuggestions(false);
   };
 
+  const createClientFromQuery = () => {
+    setNewClient({ nombre: clientSearchQuery, identificacion: "", email: "", telefono: "", ciudad: "" });
+    setIsCreatingClient(true);
+    setShowSuggestions(false);
+  };
+
   const saveClientToDb = () => {
     if (!newClient.nombre.trim() || !newClient.identificacion.trim()) {
       alert("El nombre y la identificación (NIT/CC) son obligatorios.");
