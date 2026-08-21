@@ -340,6 +340,17 @@ export default function Cotizador() {
     return { node, cleanup: () => { try { document.body.removeChild(holder); } catch (e) {} } };
   };
 
+  const loadHtml2Pdf = () => {
+    return new Promise((resolve, reject) => {
+      if (window.html2pdf) return resolve(window.html2pdf);
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+      script.onload = () => resolve(window.html2pdf);
+      script.onerror = () => reject(new Error("Failed to load html2pdf"));
+      document.body.appendChild(script);
+    });
+  };
+
   // Construye el jsPDF completo (contenido limpio + encabezado/pie en cada página).
   const buildPdf = () => {
     const { node, cleanup } = buildCleanNode();
@@ -353,7 +364,7 @@ export default function Cotizador() {
     };
     return Promise.all([getImageData('assets/logo.png'), waitForImages(node), document.fonts.ready])
       .then(([logo]) =>
-        html2pdf().set(opt).from(node).toPdf().get('pdf').then(pdf => {
+        window.html2pdf().set(opt).from(node).toPdf().get('pdf').then(pdf => {
           const n = pdf.internal.getNumberOfPages();
           for (let i = 1; i <= n; i++) { pdf.setPage(i); drawHeaderFooter(pdf, logo, i, n); }
           cleanup();
@@ -364,8 +375,9 @@ export default function Cotizador() {
   };
 
   // Usado por el envío por correo / WhatsApp: devuelve un File con el PDF.
-  const generatePdfFile = () => {
-    if (typeof html2pdf === 'undefined') {
+  const generatePdfFile = async () => {
+    await loadHtml2Pdf();
+    if (!window.html2pdf) {
       return Promise.reject(new Error("La librería html2pdf no se pudo cargar. Revisa tu conexión a internet."));
     }
     return buildPdf().then(({ pdf, filename }) => {
@@ -375,8 +387,9 @@ export default function Cotizador() {
   };
 
   // Botón "Descargar PDF": genera y descarga el archivo directamente (sin diálogo de impresión).
-  const downloadPdf = () => {
-    if (typeof html2pdf === 'undefined') {
+  const downloadPdf = async () => {
+    await loadHtml2Pdf();
+    if (!window.html2pdf) {
       alert("No se pudo cargar el generador de PDF. Revisa tu conexión a internet.");
       return;
     }
