@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getApiUrl } from '../../utils/api';
+import { getApiUrl, fetchWithAuth, getAuthUser, clearAuth } from '../../utils/api';
+import AuthBoundary from '../../components/AuthBoundary';
 
 export default function AdminProductos() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginError, setLoginError] = useState(false);
+  const currentUser = getAuthUser();
+  
   
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -12,7 +12,7 @@ export default function AdminProductos() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
-  const [viewMode, setViewMode] = useState('table');
+  const [viewMode, setViewMode] = useState('grid');
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,18 +38,17 @@ export default function AdminProductos() {
   const [uploadError, setUploadError] = useState('');
 
   useEffect(() => {
-    if (sessionStorage.getItem('fl_admin_auth') === 'true') {
-      setIsAuthenticated(true);
+    if (currentUser?.rol === 'admin') {
       fetchProducts();
     } else {
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchProducts = () => {
     setIsLoading(true);
-    fetch(getApiUrl('get_products'))
-      .then(r => r.json())
+    fetchWithAuth('get_products')
       .then(data => {
         if (data.success) {
           setProducts(data.productos || []);
@@ -62,21 +61,11 @@ export default function AdminProductos() {
       });
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (loginPassword === 'admin') {
-      sessionStorage.setItem('fl_admin_auth', 'true');
-      setIsAuthenticated(true);
-      fetchProducts();
-    } else {
-      setLoginError(true);
-    }
-  };
+
 
   const handleLogout = () => {
-    sessionStorage.removeItem('fl_admin_auth');
-    setIsAuthenticated(false);
-    setLoginPassword('');
+    clearAuth();
+    window.location.reload();
   };
 
   const handleSearchChange = (e) => {
@@ -141,11 +130,10 @@ export default function AdminProductos() {
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch(getApiUrl('upload_product_image'), {
+    fetchWithAuth('upload_product_image', {
       method: 'POST',
       body: formData
     })
-    .then(r => r.json())
     .then(data => {
       if (data.success) {
         const newMedia = { url: data.img, type: data.type || 'image' };
@@ -178,12 +166,10 @@ export default function AdminProductos() {
     setIsSaving(true);
     const action = editingProduct ? 'update_product' : 'create_product';
 
-    fetch(getApiUrl(action), {
+    fetchWithAuth(action, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: form
     })
-    .then(r => r.json())
     .then(data => {
       if (data.success) {
         fetchProducts();
@@ -201,12 +187,10 @@ export default function AdminProductos() {
 
   const deleteProduct = (p) => {
     if (confirm(`¿Estás seguro de que deseas eliminar permanentemente "${p.name}"? Esta acción no se puede deshacer.`)) {
-      fetch(getApiUrl('delete_product'), {
+      fetchWithAuth('delete_product', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: p.id })
+        body: { id: p.id }
       })
-      .then(r => r.json())
       .then(data => {
         if (data.success) {
           fetchProducts();
@@ -238,50 +222,51 @@ export default function AdminProductos() {
     setCurrentPage(pageNumber);
   };
 
-  if (!isAuthenticated) {
+  
+  if (false) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', background: '#ededed' }}>
-        <form onSubmit={handleLogin} className="panel-card" style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-          <img src="assets/logo.png" style={{ height: '60px', marginBottom: '20px', backgroundColor: '#2d2d2d', padding: '10px', borderRadius: '8px' }} alt="Logo" />
-          <h2 style={{ fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', marginTop: 0 }}>Acceso Restringido</h2>
-          <p style={{ color: '#666', fontSize: '14px', marginBottom: '24px' }}>Ingresa la contraseña para administrar el catálogo de productos.</p>
-          
-          <input 
-            type="password" 
-            value={loginPassword} 
-            onChange={(e) => { setLoginPassword(e.target.value); setLoginError(false); }} 
-            placeholder="Contraseña..." 
-            style={{ width: '100%', boxSizing: 'border-box', padding: '12px', border: '1px solid #ccc', borderRadius: '6px', textAlign: 'center', fontSize: '16px', marginBottom: '16px' }}
-          />
-          
-          {loginError && (
-            <div style={{ color: '#e63946', fontSize: '13px', marginBottom: '16px' }}>Contraseña incorrecta. (Tip: es 'admin')</div>
-          )}
-          
-          <button type="submit" style={{ width: '100%', background: '#e63946', color: 'white', border: 'none', padding: '14px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontSize: '16px', textTransform: 'uppercase', cursor: 'pointer', fontWeight: 600 }}>Entrar al Administrador</button>
-        </form>
-      </div>
+      <AuthBoundary>
+        <div style={{ padding: '40px', textAlign: 'center' }}>
+          <h2>Acceso Denegado</h2>
+          <p>Solo los administradores pueden gestionar productos. (Tu rol actual en el sistema es: <strong>{currentUser?.rol || 'Ninguno/Vacío'}</strong>)</p>
+          <button onClick={handleLogout} style={{ background: '#1d3557', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px' }}>
+            Cerrar sesión e intentar con otro usuario
+          </button>
+          <br/>
+          <a href="cotizador.html">Volver al cotizador</a>
+        </div>
+      </AuthBoundary>
     );
   }
 
-  // Corregir variable "white" indefinida si hay error. En style de arriba dice color: white, debió ser color: 'white'. Corrijo en el JSX de abajo.
-  
   return (
+    <AuthBoundary>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <header className="app-header" style={{ background: '#1d3557', color: 'white', padding: '16px 24px', borderBottom: '3px solid #e63946', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <header className="app-header" style={{ background: '#1d3557', color: 'white', padding: '16px 24px', borderBottom: '3px solid #e63946', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <img src="assets/logo.png" alt="Logo" style={{ height: '50px', background: 'white', padding: '4px', borderRadius: '4px' }} />
+          <img src="assets/logo.png" alt="Fitness Life S.A.S" style={{ height: '50px', width: 'auto', background: 'white', padding: '4px', borderRadius: '4px', objectFit: 'contain' }} />
           <div>
             <h1 style={{ fontFamily: 'Oswald, sans-serif', fontSize: '20px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gestor de Productos</h1>
           </div>
         </div>
-        <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
-          <a href="cotizador.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', padding: '8px 16px', fontWeight: 600, fontSize: '12px', borderRadius: '4px', textDecoration: 'none', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center' }}>
-            ← Ir al Cotizador
+        <div className="header-actions" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <a href="cotizador.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column', textDecoration: 'none' }}><span style={{fontSize:"16px", marginBottom:"4px"}}>✨</span><span>Nueva Cotización</span></a>
+          <a href="mis_cotizaciones.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column', textDecoration: 'none' }}>
+            <span style={{fontSize:"16px", marginBottom:"4px"}}>📂</span><span>Historial</span>
           </a>
-          <button onClick={handleLogout} style={{ background: '#e63946', color: 'white', border: 'none', padding: '8px 16px', fontWeight: 600, fontSize: '12px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-            Cerrar Sesión
+          {getAuthUser()?.rol === 'admin' && (
+            <a href="admin_productos.html" style={{ background: '#457b9d', color: 'white', border: '1px solid #457b9d', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column', textDecoration: 'none' }}>
+              <span style={{fontSize:"16px", marginBottom:"4px"}}>📦</span><span>Productos</span>
+            </a>
+          )}
+          {getAuthUser()?.rol === 'admin' && (
+            <a href="admin_usuarios.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column', textDecoration: 'none' }}>
+              <span style={{fontSize:"16px", marginBottom:"4px"}}>👥</span><span>Usuarios</span>
+            </a>
+          )}
+          <button onClick={handleLogout} style={{ background: '#e63946', color: 'white', border: 'none', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column' }}>
+            <span style={{fontSize:"16px", marginBottom:"4px"}}>🚪</span><span>Cerrar Sesión</span>
           </button>
         </div>
       </header>
@@ -546,5 +531,6 @@ export default function AdminProductos() {
         </div>
       )}
     </div>
+    </AuthBoundary>
   );
 }

@@ -95,24 +95,30 @@ input, textarea, select {
       font-size: 14px;
     }
     .app-header {
-      flex-direction: column;
+      flex-direction: column !important;
       align-items: flex-start !important;
       gap: 16px;
       padding: 16px;
     }
-    .header-actions {
-      width: 100%;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .header-actions button, .header-actions a {
-      flex: 1;
-      text-align: center;
-      justify-content: center;
-      min-width: 120px;
-    }
+      .header-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .header-actions a, .header-actions button {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column !important;
+    min-width: calc(50% - 8px);
+    box-sizing: border-box;
+    padding: 10px 4px !important;
+    gap: 4px !important;
+    font-size: 11px !important;
+  }
   }
 }
 
@@ -141,7 +147,7 @@ input, textarea, select {
   font-weight: 600;
   text-transform: uppercase;
   font-family: Oswald, sans-serif;
-  letter-spacing: 0.05em;
+  
   cursor: pointer;
   display: inline-block;
   transition: all 0.2s;
@@ -157,7 +163,25 @@ input, textarea, select {
   transform: translateY(0);
 }
 
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid rgba(255, 255, 255, 0.2);
+  border-top: 5px solid #a8dadc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 @media screen and (max-width: 768px) {
+  .print-container {
+    zoom: 0.9;
+  }
   .print-container {
     padding: 20px !important;
   }
@@ -233,7 +257,7 @@ input, textarea, select {
     padding: 0 !important;
     border-bottom: none !important;
     display: flex;
-    flex-direction: column;
+    flex-direction: column !important;
     align-items: stretch;
     gap: 6px;
   }
@@ -275,7 +299,7 @@ input, textarea, select {
     font-size: 10px;
     color: #e63946;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    
   }
   .editor-table td:not(.desc-cell) input {
     width: 130px !important;
@@ -329,7 +353,7 @@ input, textarea, select {
 .pdf-running-header img { height: 46px; width: auto; object-fit: contain; }
 .pdf-running-header .rh-title {
   font-family: 'Oswald', sans-serif; font-size: 24px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .04em; line-height: 1; color: #2d2d2d;
+  text-transform: uppercase;  line-height: 1; color: #2d2d2d;
 }
 .pdf-running-header .rh-meta { text-align: right; font-size: 10px; color: #727272; line-height: 1.55; }
 
@@ -364,7 +388,7 @@ input, textarea, select {
   .pdf-running-footer {
     display: block !important;
     margin-top: 14px; padding-top: 6px; border-top: 1px solid #d8d8d8;
-    text-align: center; font-size: 8.5px; color: #7f7f7f; letter-spacing: .03em;
+    text-align: center; font-size: 8.5px; color: #7f7f7f; 
   }
   /* Al imprimir usamos el encabezado/pie recurrentes; ocultamos los del cuerpo
      para no duplicar (y para que el cuerpo fluya y llene las páginas). */
@@ -391,4 +415,18 @@ input, textarea, select {
     background: transparent !important;
     border: none !important;
   }
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

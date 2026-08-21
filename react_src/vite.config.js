@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         cotizador: resolve(__dirname, 'cotizador.html'),
         admin_productos: resolve(__dirname, 'admin_productos.html'),
+        admin_usuarios: resolve(__dirname, 'admin_usuarios.html'),
         mis_cotizaciones: resolve(__dirname, 'mis_cotizaciones.html'),
         ver_cotizacion: resolve(__dirname, 'ver_cotizacion.html'),
       },

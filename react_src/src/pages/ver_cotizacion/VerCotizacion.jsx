@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getApiUrl } from '../../utils/api';
+import { getApiUrl, fetchWithAuth, clearAuth } from '../../utils/api';
+import AuthBoundary from '../../components/AuthBoundary';
 
 const fmt = (n) => '$ ' + Math.round(n).toLocaleString('es-CO');
 
@@ -25,8 +26,7 @@ export default function VerCotizacion() {
 
   const fetchQuote = (id) => {
     setIsLoading(true);
-    fetch(getApiUrl('get_quotes'))
-      .then(r => r.json())
+    fetchWithAuth('get_quotes')
       .then(data => {
         if (data.success) {
           const q = (data.quotes || []).find(x => String(x.id) === String(id));
@@ -86,6 +86,7 @@ export default function VerCotizacion() {
   }
 
   return (
+    <AuthBoundary>
     <div>
       <div className="no-print">
         {/* Encabezado de la App (Solo Pantalla) */}
@@ -245,5 +246,6 @@ export default function VerCotizacion() {
         </table>
       </div>
     </div>
+    </AuthBoundary>
   );
 }

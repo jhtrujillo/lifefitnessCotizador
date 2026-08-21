@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getApiUrl } from '../../utils/api';
+import { getApiUrl, fetchWithAuth, getAuthUser, clearAuth } from '../../utils/api';
+import AuthBoundary from '../../components/AuthBoundary';
 
 const fmt = (n) => '$ ' + Math.round(n).toLocaleString('es-CO');
 const parseNum = (v) => {
@@ -30,7 +31,7 @@ export default function Cotizador() {
     address: '',
     phone: '',
     email: '',
-    adviser: 'Asesor Fitness Life',
+    adviser: getAuthUser()?.nombre || 'Asesor Fitness Life',
     date: new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }),
     validDays: '30 días'
   });
@@ -115,8 +116,7 @@ export default function Cotizador() {
   };
 
   const fetchNextQuoteNo = () => {
-    fetch(getApiUrl('get_next_quote_no'))
-      .then(r => r.json())
+    fetchWithAuth('get_next_quote_no')
       .then(data => {
         if (data.success && data.quote_no) {
           setClient(prev => ({ ...prev, quoteNo: data.quote_no }));
@@ -126,8 +126,7 @@ export default function Cotizador() {
   };
 
   const fetchProducts = () => {
-    fetch(getApiUrl('get_products'))
-      .then(r => r.json())
+    fetchWithAuth('get_products')
       .then(data => {
         if (data.success) {
           const mapped = data.productos.map(p => ({
@@ -146,9 +145,13 @@ export default function Cotizador() {
       .catch(err => console.error(err));
   };
 
+  const handleLogout = () => {
+    clearAuth();
+    window.dispatchEvent(new Event('auth_failed'));
+  };
+
   const fetchClients = () => {
-    fetch(getApiUrl('get_clients'))
-      .then(r => r.json())
+    fetchWithAuth('get_clients')
       .then(data => {
         if (data.success) {
           setClientsList(data.clients || []);
@@ -158,8 +161,7 @@ export default function Cotizador() {
   };
 
   const fetchAndLoadQuote = (id) => {
-    fetch(getApiUrl('get_quotes'))
-      .then(r => r.json())
+    fetchWithAuth('get_quotes')
       .then(data => {
         if (data.success) {
           const q = (data.quotes || []).find(x => String(x.id) === String(id));
@@ -200,7 +202,7 @@ export default function Cotizador() {
       address: '',
       phone: '',
       email: '',
-      adviser: 'Asesor Fitness Life',
+      adviser: getAuthUser()?.nombre || 'Asesor Fitness Life',
       date: new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }),
       validDays: '30 días'
     });
@@ -234,12 +236,10 @@ export default function Cotizador() {
     setSaveModalState('saving');
     setSaveModalMessage('');
 
-    fetch(getApiUrl('save_quote'), {
+    fetchWithAuth('save_quote', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: payload
     })
-      .then(r => r.json())
       .then(data => {
         if (data.success) {
           clearDraft();
@@ -351,7 +351,7 @@ export default function Cotizador() {
       jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' },
       pagebreak:   { mode: ['css', 'legacy'] }
     };
-    return Promise.all([getImageData('assets/logo.png'), waitForImages(node)])
+    return Promise.all([getImageData('assets/logo.png'), waitForImages(node), document.fonts.ready])
       .then(([logo]) =>
         html2pdf().set(opt).from(node).toPdf().get('pdf').then(pdf => {
           const n = pdf.internal.getNumberOfPages();
@@ -467,19 +467,18 @@ export default function Cotizador() {
           const base64data = reader.result;
           
           try {
-            const response = await fetch(getApiUrl('send_email'), {
+            const response = await fetchWithAuth('send_email', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
+              body: {
                 to: client.email,
                 subject: `Cotización ${client.quoteNo} - Fitness Life`,
                 body: generateMessageBody(false),
                 pdf: base64data,
                 filename: file.name
-              })
+              }
             });
             
-            const result = await response.json();
+            const result = response;
             if (result.success) {
               setEmailModalState('success');
               setEmailModalMessage("El correo fue enviado exitosamente a: " + client.email);
@@ -538,12 +537,10 @@ export default function Cotizador() {
       return;
     }
 
-    fetch(getApiUrl('create_client'), {
+    fetchWithAuth('create_client', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newClient)
+      body: newClient
     })
-      .then(r => r.json())
       .then(data => {
         if (data.success) {
           setClient(prev => ({
@@ -655,6 +652,7 @@ export default function Cotizador() {
     : clientsList.filter(c => c.nombre.toLowerCase().includes(cQuery) || c.identificacion.toLowerCase().includes(cQuery));
 
   return (
+    <AuthBoundary>
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       
       {/* Email Modal */}
@@ -663,7 +661,7 @@ export default function Cotizador() {
           <div style={{ width: 100 + '%', maxWidth: 450 + 'px', padding: 24 + 'px', textAlign: 'center' }}>
             {emailModalState === 'sending' && (
               <div>
-                <div style={{ fontSize: 40 + 'px', marginBottom: 16 + 'px' }}>✉️</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}><div className="loading-spinner"></div></div>
                 <h3 style={{ fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', margin: '0 0 8px' }}>Enviando cotización</h3>
                 <p style={{ margin: 0, color: '#a8dadc', fontSize: 14 + 'px' }}>Generando PDF y conectando con el servidor técnico...</p>
               </div>
@@ -696,7 +694,7 @@ export default function Cotizador() {
           <div style={{ width: 100 + '%', maxWidth: 450 + 'px', padding: 24 + 'px', textAlign: 'center' }}>
             {saveModalState === 'saving' && (
               <div>
-                <div style={{ fontSize: 40 + 'px', marginBottom: 16 + 'px' }}>💾</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}><div className="loading-spinner"></div></div>
                 <h3 style={{ fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', margin: '0 0 8px' }}>Guardando cotización</h3>
                 <p style={{ margin: 0, color: '#a8dadc', fontSize: 14 + 'px' }}>Escribiendo registros en la base de datos de Fitness Life...</p>
               </div>
@@ -725,26 +723,33 @@ export default function Cotizador() {
 
       <div className="no-print">
         {/* Encabezado Premium */}
-        <header className="app-header" style={{ background: '#1d3557', color: 'white', padding: '16px 24px', borderBottom: '3px solid #e63946', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <img src="assets/logo.png" alt="Fitness Life S.A.S" style={{ height: '50px', width: 'auto', background: 'white', padding: '4px', borderRadius: '4px' }} />
-            <div>
-              <h1 style={{ fontFamily: 'Oswald, sans-serif', fontSize: '20px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cotizador Premium</h1>
-            </div>
+                    <header className="app-header" style={{ background: '#1d3557', color: 'white', padding: '16px 24px', borderBottom: '3px solid #e63946', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <img src="assets/logo.png" alt="Fitness Life S.A.S" style={{ height: '50px', width: 'auto', background: 'white', padding: '4px', borderRadius: '4px', objectFit: 'contain' }} />
+          <div>
+            <h1 style={{ fontFamily: 'Oswald, sans-serif', fontSize: '20px', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cotizador Premium</h1>
           </div>
-          
-          <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
-            <a href="admin_productos.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 16px', fontWeight: 600, fontSize: '12px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', textDecoration: 'none' }}>
-              📦 Productos
+        </div>
+        <div className="header-actions" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button onClick={startNewQuote} style={{ background: '#457b9d', color: 'white', border: 'none', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column' }}><span style={{fontSize:"16px", marginBottom:"4px"}}>✨</span><span>Nueva Cotización</span></button>
+          <a href="mis_cotizaciones.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column', textDecoration: 'none' }}>
+            <span style={{fontSize:"16px", marginBottom:"4px"}}>📂</span><span>Historial</span>
+          </a>
+          {getAuthUser()?.rol === 'admin' && (
+            <a href="admin_productos.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column', textDecoration: 'none' }}>
+              <span style={{fontSize:"16px", marginBottom:"4px"}}>📦</span><span>Productos</span>
             </a>
-            <a href="mis_cotizaciones.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '8px 16px', fontWeight: 600, fontSize: '12px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', textDecoration: 'none' }}>
-              📂 Historial
+          )}
+          {getAuthUser()?.rol === 'admin' && (
+            <a href="admin_usuarios.html" style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column', textDecoration: 'none' }}>
+              <span style={{fontSize:"16px", marginBottom:"4px"}}>👥</span><span>Usuarios</span>
             </a>
-            <button onClick={startNewQuote} style={{ background: '#457b9d', color: 'white', border: 'none', padding: '8px 16px', fontWeight: 600, fontSize: '12px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', cursor: 'pointer' }}>
-              ✨ Limpiar / Nueva
-            </button>
-          </div>
-        </header>
+          )}
+          <button onClick={handleLogout} style={{ background: '#e63946', color: 'white', border: 'none', padding: '10px 4px', boxSizing: 'border-box', fontWeight: 600, fontSize: '11px', borderRadius: '4px', textTransform: 'uppercase', fontFamily: 'Oswald, sans-serif', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexDirection: 'column' }}>
+            <span style={{fontSize:"16px", marginBottom:"4px"}}>🚪</span><span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </header>
 
         {/* Layout en Pantalla */}
         <div className="screen-layout">
@@ -1115,5 +1120,6 @@ export default function Cotizador() {
         </table>
       </div>
     </div>
+    </AuthBoundary>
   );
 }
