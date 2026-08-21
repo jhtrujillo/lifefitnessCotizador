@@ -1,0 +1,4 @@
+react_src/node_modules/
+.DS_Store
+uploads/
+test_api_out.txt

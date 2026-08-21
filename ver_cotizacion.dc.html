@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<title>Ver Cotización — Fitness Life S.A.S</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    color: #333333;
+    background: #f2f2f2;
+  }
+  
+  /* Utils */
+  .panel-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    padding: 32px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    max-width: 800px;
+    margin: 40px auto;
+  }
+
+  @media screen {
+    .print-only { display: none !important; }
+    
+    @media (max-width: 768px) {
+      .panel-card {
+        margin: 16px;
+        padding: 20px;
+      }
+      .app-header {
+        flex-direction: column;
+        align-items: center !important;
+        gap: 16px;
+        padding: 16px;
+      }
+      .client-info-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .table-wrapper {
+        overflow-x: auto;
+        margin: 0 -20px;
+        padding: 0 20px;
+      }
+      .items-table {
+        min-width: 600px;
+      }
+    }
+  }
+
+  /* ESTILOS DE IMPRESIÓN (Cuando el cliente le de a "Descargar PDF" / Imprimir) */
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white !important; color: black !important; margin: 0; }
+    .panel-card {
+      margin: 0;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      max-width: 100%;
+    }
+    .print-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0.6in;
+      background: white;
+    }
+    .items-table th { color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .totals-bg { background: #e63946 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</helmet>
+
+<div class="no-print">
+  <!-- Encabezado de la App (Solo Pantalla) -->
+  <header class="app-header" style="background: #2d2d2d; color: white; padding: 16px 24px; border-bottom: 3px solid #e63946; display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <img src="assets/logo.png" alt="Fitness Life S.A.S" style="height: 50px; width: auto; background: white; padding: 4px; border-radius: 4px;"/>
+      <div>
+        <h1 style="font-family: Oswald, sans-serif; font-size: 20px; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Documento Comercial</h1>
+      </div>
+    </div>
+    
+    <sc-if value="{{!isLoading && !isError}}">
+      <div style="display: flex; gap: 12px;">
+        <button onClick="window.print()" style="background: #e63946; color: white; border: none; padding: 10px 20px; font-weight: 600; font-size: 13px; border-radius: 4px; text-transform: uppercase; font-family: Oswald, sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+          🖨️ Descargar PDF
+        </button>
+      </div>
+    </sc-if>
+  </header>
+</div>
+
+<!-- ESTADO DE CARGA -->
+<sc-if value="{{isLoading}}">
+  <div style="display: flex; justify-content: center; align-items: center; min-height: 50vh; color: #666666; font-family: Oswald, sans-serif; font-size: 24px; text-transform: uppercase; letter-spacing: 0.05em;">
+    Cargando cotización...
+  </div>
+</sc-if>
+
+<!-- ESTADO DE ERROR -->
+<sc-if value="{{isError}}">
+  <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 50vh; color: #666666;">
+    <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+    <h2 style="font-family: Oswald, sans-serif; margin: 0 0 8px; text-transform: uppercase; color: #333333;">Cotización no encontrada</h2>
+    <p style="margin: 0; font-size: 15px;">El enlace es inválido o la cotización fue eliminada del sistema.</p>
+  </div>
+</sc-if>
+
+<!-- VISOR DEL DOCUMENTO (Pantalla e Impresión) -->
+<sc-if value="{{!isLoading && !isError}}">
+  <div class="panel-card print-container">
+    
+    <!-- Cabecera -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; border-bottom: 3px solid #e63946; padding-bottom: 18px; margin-bottom: 26px;">
+      <img src="assets/logo.png" alt="Fitness Life S.A.S" style="height: 72px; width: auto; max-width: 100%; object-fit: contain;"/>
+      <div style="text-align: right;">
+        <div style="font-family: Oswald, sans-serif; font-size: 30px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; line-height: 1; color: #2d2d2d;">Cotización</div>
+        <div style="font-size: 11px; color: #727272; margin-top: 8px; line-height: 1.7;">
+          <div>N.º <span style="font-weight: 600; color: #333333;">{{client.quoteNo}}</span></div>
+          <div>Fecha <span style="color: #333333;">{{client.date}}</span></div>
+          <div>Válida por <span style="color: #333333;">{{client.validDays}}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información de Contacto -->
+    <div class="client-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 30px;">
+      <div>
+        <div style="font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: #e63946; font-weight: 700; margin-bottom: 8px;">Cliente</div>
+        <div style="font-size: 13px; line-height: 1.9;">
+          <div style="font-weight: 600; color: #333333; font-size: 15px;">{{client.name}}</div>
+          <div>NIT / C.C.: {{client.id}}</div>
+          <div>Dirección: {{client.address}}</div>
+          <div>Teléfono: {{client.phone}}</div>
+          <div>Email: {{client.email}}</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: #e63946; font-weight: 700; margin-bottom: 8px;">Asesor comercial</div>
+        <div style="font-size: 13px; line-height: 1.9;">
+          <div style="font-weight: 600; color: #333333; font-size: 14px;">{{client.adviser}}</div>
+          <div>Fitness Life S.A.S</div>
+          <div>ventas@fitnesslifesas.com</div>
+          <div>+57 (1) 555-0100</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Items -->
+    <div class="table-wrapper">
+      <table class="items-table" style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 30px;">
+        <thead>
+          <tr style="background: #2d2d2d; color: white;">
+            <th style="padding: 11px 10px; text-align: left; font-family: Oswald, sans-serif; font-weight: 500; letter-spacing: .1em; font-size: 10px; text-transform: uppercase; width: 104px;">Imagen</th>
+            <th style="padding: 11px 10px; text-align: left; font-family: Oswald, sans-serif; font-weight: 500; letter-spacing: .1em; font-size: 10px; text-transform: uppercase;">Descripción</th>
+            <th style="padding: 11px 10px; text-align: center; font-family: Oswald, sans-serif; font-weight: 500; letter-spacing: .1em; font-size: 10px; text-transform: uppercase; width: 52px;">Cant.</th>
+            <th style="padding: 11px 10px; text-align: right; font-family: Oswald, sans-serif; font-weight: 500; letter-spacing: .1em; font-size: 10px; text-transform: uppercase; width: 104px;">Vr. Unitario</th>
+            <th style="padding: 11px 10px; text-align: right; font-family: Oswald, sans-serif; font-weight: 500; letter-spacing: .1em; font-size: 10px; text-transform: uppercase; width: 110px;">Vr. Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{cartItems}}" as="row">
+            <tr style="border-bottom: 1px solid #e0e0e0; break-inside: avoid;">
+              <td style="padding: 12px 10px; vertical-align: top;">
+                <div style="width: 84px; height: 66px; border: 1px dashed #c6c6c6; background: #f7f7f7; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px;">
+                  <img src="{{row.img}}" alt="" style="max-width: 100%; max-height: 100%; object-fit: contain;"/>
+                </div>
+              </td>
+              <td style="padding: 12px 10px; vertical-align: top;">
+                <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #333333;">{{row.name}}</div>
+                <div style="font-size: 11.5px; color: #727272; line-height: 1.5; white-space: pre-wrap;">{{row.desc}}</div>
+              </td>
+              <td style="padding: 12px 10px; text-align: center; vertical-align: top; font-weight: 600; font-size: 14px;">{{row.qty}}</td>
+              <td style="padding: 12px 10px; text-align: right; vertical-align: top; color: #595959;">{{row.priceFormatted}}</td>
+              <td style="padding: 12px 10px; text-align: right; vertical-align: top; font-weight: 700; color: #333333;">{{row.totalFormatted}}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Totales -->
+    <div style="display: flex; justify-content: flex-end; margin-top: 10px; break-inside: avoid;">
+      <div style="width: 320px; font-size: 14px; max-width: 100%;">
+        <div style="display: flex; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #e0e0e0;">
+          <span style="color: #727272;">Subtotal</span>
+          <span style="font-weight: 600; color: #333333;">{{subtotal}}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid #e0e0e0;">
+          <span style="color: #727272;">IVA (19%)</span>
+          <span style="font-weight: 600; color: #333333;">{{iva}}</span>
+        </div>
+        <div class="totals-bg" style="display: flex; justify-content: space-between; padding: 16px; background: #e63946; color: white; font-family: Oswald, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: .03em; border-radius: 0 0 8px 8px;">
+          <span>TOTAL</span>
+          <span>{{total}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Condiciones comerciales -->
+    <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e0e0e0; break-inside: avoid;">
+      <div style="font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #e63946; font-weight: 700; margin-bottom: 12px;">Condiciones comerciales</div>
+      <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #6b6b6b; line-height: 1.85;">
+        <li>Precios en pesos colombianos (COP). Validez de la oferta según la fecha de expiración indicada.</li>
+        <li>Forma de pago: 50% anticipo, 50% contra entrega, salvo acuerdo distinto por escrito.</li>
+        <li>Tiempo de entrega sujeto a disponibilidad de inventario al momento de la orden.</li>
+        <li>Incluye garantía Fitness Life y soporte técnico especializado post-venta.</li>
+        <li>Instalación y transporte se cotizan por separado según ubicación geográfica.</li>
+      </ul>
+    </div>
+
+    <!-- Pie de Página Documento -->
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-top: 1px solid #d8d8d8; padding-top: 12px; margin-top: 48px; font-size: 10px; color: #7f7f7f; letter-spacing: .04em; gap: 12px;">
+      <span>FITNESS LIFE S.A.S — Importador Directo Autorizado en Colombia</span>
+      <span>ventas@fitnesslifesas.com · +57 (1) 555-0100</span>
+    </div>
+  </div>
+</sc-if>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props="{}">
+const fmt = (n) => '$ ' + Math.round(n).toLocaleString('es-CO');
+
+class Component extends DCLogic {
+  state = {
+    isLoading: true,
+    isError: false,
+    client: {},
+    items: [],
+    subtotalNum: 0
+  };
+
+  componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
+    const quoteId = params.get('id');
+    
+    if (!quoteId) {
+      this.setState({ isLoading: false, isError: true });
+      return;
+    }
+
+    this.fetchQuote(quoteId);
+  }
+
+  fetchQuote = (id) => {
+    fetch('api.php?action=get_quotes')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          const q = data.quotes.find(x => String(x.id) === String(id));
+          if (q) {
+            const items = q.items_json || [];
+            const subtotalNum = items.reduce((acc, it) => acc + (it.qty * it.price), 0);
+            
+            this.setState({
+              isLoading: false,
+              isError: false,
+              client: q.cliente_json || {},
+              items: items,
+              subtotalNum: subtotalNum
+            });
+          } else {
+            this.setState({ isLoading: false, isError: true });
+          }
+        } else {
+          this.setState({ isLoading: false, isError: true });
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        this.setState({ isLoading: false, isError: true });
+      });
+  };
+
+  renderVals() {
+    const cartItems = this.state.items.map((it) => ({
+      ...it,
+      priceFormatted: fmt(it.price),
+      totalFormatted: fmt(it.qty * it.price)
+    }));
+
+    const ivaNum = this.state.subtotalNum * 0.19;
+    const totalNum = this.state.subtotalNum + ivaNum;
+
+    return {
+      isLoading: this.state.isLoading,
+      isError: this.state.isError,
+      client: this.state.client,
+      cartItems: cartItems,
+      subtotal: fmt(this.state.subtotalNum),
+      iva: fmt(ivaNum),
+      total: fmt(totalNum)
+    };
+  }
+}
+</script>
+</body>
+</html>

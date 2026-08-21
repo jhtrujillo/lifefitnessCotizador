@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  color: #333333;
+  background: #f2f2f2;
+}
+
+/* Utils */
+.panel-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  padding: 32px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+  max-width: 800px;
+  margin: 40px auto;
+}
+
+@media screen {
+  .print-only { display: none !important; }
+  
+  @media (max-width: 768px) {
+    .panel-card {
+      margin: 16px;
+      padding: 20px;
+    }
+    .app-header {
+      flex-direction: column;
+      align-items: center !important;
+      gap: 16px;
+      padding: 16px;
+    }
+    .client-info-grid {
+      grid-template-columns: 1fr !important;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 0 -20px;
+      padding: 0 20px;
+    }
+    .items-table {
+      min-width: 600px;
+    }
+  }
+}
+
+/* Marco (thead/tfoot) que repite encabezado y pie en cada página impresa.
+   En pantalla el thead/tfoot van vacíos (running header/footer ocultos). */
+.pdf-frame { width: 100%; border-collapse: collapse; }
+.pdf-frame > thead > tr > td,
+.pdf-frame > tfoot > tr > td,
+.pdf-frame > tbody > tr > td { padding: 0; border: 0; vertical-align: top; }
+
+.pdf-running-header, .pdf-running-footer { display: none; }
+.pdf-running-header img { height: 46px; width: auto; object-fit: contain; }
+.pdf-running-header .rh-title {
+  font-family: 'Oswald', sans-serif; font-size: 24px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .04em; line-height: 1; color: #2d2d2d;
+}
+.pdf-running-header .rh-meta { text-align: right; font-size: 10px; color: #727272; line-height: 1.55; }
+
+/* ESTILOS DE IMPRESIÓN (Cuando el cliente le de a "Descargar PDF" / Imprimir) */
+@media print {
+  @page { margin: 0.5in; size: letter portrait; }
+  .no-print { display: none !important; }
+  html, body { background: white !important; color: black !important; margin: 0; }
+  .panel-card {
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    max-width: 100%;
+  }
+  .print-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;            /* los márgenes de página los aplica @page */
+    background: white;
+  }
+
+  /* Encabezado / pie recurrentes: se muestran y se repiten en cada página */
+  .pdf-frame thead { display: table-header-group; }
+  .pdf-frame tfoot { display: table-footer-group; }
+  .pdf-running-header {
+    display: flex !important;
+    align-items: flex-end; justify-content: space-between; gap: 24px;
+    padding-bottom: 8px; margin-bottom: 18px; border-bottom: 3px solid #e63946;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .pdf-running-footer {
+    display: block !important;
+    margin-top: 14px; padding-top: 6px; border-top: 1px solid #d8d8d8;
+    text-align: center; font-size: 8.5px; color: #7f7f7f; letter-spacing: .03em;
+  }
+  .print-container .doc-head { display: none !important; }
+  .print-container .quote-footer { display: none !important; }
+
+  /* Densidad para aprovechar el espacio y reducir páginas */
+  .print-container .client-info-grid { margin-bottom: 16px !important; }
+  .print-container .items-table { margin-bottom: 14px !important; }
+  .print-container .items-table thead th { padding: 7px 9px !important; }
+  .print-container .items-table tbody td { padding: 7px 9px !important; }
+  .print-container .row-img { width: 58px !important; height: 46px !important; }
+  .print-container .quote-terms { margin-top: 16px !important; padding-top: 14px !important; page-break-inside: auto; break-inside: auto; }
+
+  /* Saltos de página: partir la tabla de ítems solo entre filas, repetir columnas */
+  .items-table { page-break-inside: auto; }
+  .items-table thead { display: table-header-group; }
+  .items-table tbody tr { page-break-inside: avoid; }
+  .avoid-break { page-break-inside: avoid; break-inside: avoid; }
+
+  .items-table th { color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .items-table thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .totals-bg { background: #e63946 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

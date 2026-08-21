@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<title>Administrador de Productos — Fitness Life S.A.S</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    color: #333333;
+    background: #ededed;
+    overflow-x: hidden;
+  }
+  input, textarea, select, button {
+    font: inherit;
+    outline: none;
+  }
+  
+  .panel-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    margin: 0 -24px;
+    padding: 0 24px;
+  }
+
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .products-table th {
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 2px solid #e63946;
+    color: #1d3557;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .products-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+  }
+  .products-table tr:hover {
+    background: #fdfdfd;
+  }
+
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(29, 53, 87, 0.8);
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; box-sizing: border-box;
+  }
+  .modal-content {
+    background: white; border-radius: 12px;
+    width: 100%; max-width: 600px;
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  }
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #e5e5e5;
+    display: flex; justify-content: flex-end; gap: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block; font-size: 12px; font-weight: 600; color: #727272; margin-bottom: 6px;
+  }
+  .form-group input, .form-group textarea {
+    width: 100%; box-sizing: border-box; background: #f7f7f7; border: 1px solid #e5e5e5; border-radius: 6px; padding: 10px 12px; font-size: 14px; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus {
+    border-color: #457b9d;
+  }
+
+  @media (max-width: 768px) {
+    .app-header { flex-direction: column; align-items: flex-start !important; gap: 16px; }
+    .header-actions { width: 100%; flex-wrap: wrap; }
+    .header-actions a, .header-actions button { flex: 1; text-align: center; justify-content: center; }
+  }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+  
+  <sc-if value="{{!isAuthenticated}}">
+    <!-- PANTALLA DE LOGIN -->
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <form onSubmit="{{handleLogin}}" class="panel-card" style="width: 100%; max-width: 400px; text-align: center;">
+        <img src="assets/logo.png" style="height: 60px; margin-bottom: 20px; background: #2d2d2d; padding: 10px; border-radius: 8px;"/>
+        <h2 style="font-family: Oswald, sans-serif; text-transform: uppercase; margin-top: 0;">Acceso Restringido</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 24px;">Ingresa la contraseña para administrar el catálogo de productos.</p>
+        
+        <input type="password" value="{{loginPassword}}" onChange="{{onLoginPasswordChange}}" placeholder="Contraseña..." style="width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 16px; margin-bottom: 16px;"/>
+        
+        <sc-if value="{{loginError}}">
+          <div style="color: #e63946; font-size: 13px; margin-bottom: 16px;">Contraseña incorrecta. (Tip: es 'admin')</div>
+        </sc-if>
+        
+        <button type="submit" style="width: 100%; background: #e63946; color: white; border: none; padding: 14px; border-radius: 6px; font-family: Oswald, sans-serif; font-size: 16px; text-transform: uppercase; cursor: pointer; font-weight: 600;">Entrar al Administrador</button>
+      </form>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isAuthenticated}}">
+    <!-- Header -->
+    <header class="app-header" style="background: #1d3557; color: white; padding: 16px 24px; border-bottom: 3px solid #e63946; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <img src="assets/logo.png" alt="Logo" style="height: 50px; background: white; padding: 4px; border-radius: 4px;"/>
+        <div>
+          <h1 style="font-family: Oswald, sans-serif; font-size: 20px; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Gestor de Productos</h1>
+        </div>
+      </div>
+      <div class="header-actions" style="display: flex; gap: 12px;">
+        <a href="cotizador.dc.html" style="background: rgba(255,255,255,0.1); color: white; padding: 8px 16px; font-weight: 600; font-size: 12px; border-radius: 4px; text-decoration: none; text-transform: uppercase; font-family: Oswald, sans-serif; display: flex; align-items: center;">
+          ← Ir al Cotizador
+        </a>
+        <button onClick="{{handleLogout}}" style="background: #e63946; color: white; border: none; padding: 8px 16px; font-weight: 600; font-size: 12px; border-radius: 4px; text-transform: uppercase; font-family: Oswald, sans-serif; cursor: pointer; display: flex; align-items: center;">
+          Cerrar Sesión
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div style="max-width: 1440px; margin: 0 auto; padding: 32px 24px; width: 100%; box-sizing: border-box; flex-grow: 1;">
+      
+      <div class="panel-card">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px;">
+          <h2 style="margin: 0; font-family: Oswald, sans-serif; text-transform: uppercase; color: #1d3557;">📦 Catálogo de Equipos</h2>
+          
+          <div style="display: flex; gap: 12px; width: 100%; max-width: 500px;">
+            <div style="display: flex; flex-grow: 1; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; background: #fdfdfd;">
+              <span style="padding: 10px 12px; color: #888;">🔍</span>
+              <input value="{{searchQuery}}" onChange="{{onSearchQueryChange}}" placeholder="Buscar producto por nombre o código..." style="width: 100%; border: none; background: transparent; padding: 10px 10px 10px 0;"/>
+            </div>
+            <button onClick="{{openCreateModal}}" style="background: #457b9d; color: white; border: none; padding: 0 20px; border-radius: 6px; font-family: Oswald, sans-serif; font-weight: 600; text-transform: uppercase; cursor: pointer; white-space: nowrap;">
+              + Añadir
+            </button>
+          </div>
+        </div>
+
+        <sc-if value="{{isLoading}}">
+          <div style="text-align: center; padding: 40px; color: #888;">Cargando catálogo...</div>
+        </sc-if>
+        
+        <sc-if value="{{!isLoading}}">
+          <div class="table-wrapper">
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">IMG</th>
+                  <th style="width: 100px;">CÓDIGO</th>
+                  <th style="width: 100px;">SERIE</th>
+                  <th>NOMBRE DEL EQUIPO</th>
+                  <th style="width: 120px;">PRECIO REF.</th>
+                  <th style="width: 100px; text-align: right;">ACCIONES</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{filteredProducts}}" as="p">
+                  <tr>
+                    <td>
+                      <div style="width: 44px; height: 34px; border: 1px solid #eee; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <sc-if value="{{p.img}}">
+                          <img data-src="{{p.img}}" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" style="max-width: 100%; max-height: 100%; object-fit: contain;"/>
+                        </sc-if>
+                        <sc-if value="{{!p.img}}">
+                          <span style="font-size: 10px; color: #ccc;">No img</span>
+                        </sc-if>
+                      </div>
+                    </td>
+                    <td style="font-weight: 600; color: #457b9d;">{{p.item_no}}</td>
+                    <td>{{p.series}}</td>
+                    <td style="font-weight: 500;">{{p.name}}</td>
+                    <td>$ {{Number(p.price).toLocaleString('es-CO')}}</td>
+                    <td style="text-align: right; white-space: nowrap;">
+                      <button onClick="{{openEditModal(p)}}" style="background: transparent; border: 1px solid #ccc; border-radius: 4px; padding: 6px 10px; cursor: pointer; margin-right: 4px; transition: 0.2s;">✏️</button>
+                      <button onClick="{{deleteProduct(p)}}" style="background: transparent; border: 1px solid #ffcccc; color: #e63946; border-radius: 4px; padding: 6px 10px; cursor: pointer;">🗑️</button>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+            <sc-if value="{{filteredProducts.length === 0}}">
+              <div style="text-align: center; padding: 40px; color: #888;">No se encontraron productos con esa búsqueda.</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- MODAL CREAR/EDITAR PRODUCTO -->
+  <sc-if value="{{isModalOpen}}">
+    <div class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 style="margin: 0; font-family: Oswald, sans-serif; text-transform: uppercase; color: #1d3557;">
+            <sc-if value="{{editingProduct}}">✏️ Editar Producto</sc-if>
+            <sc-if value="{{!editingProduct}}">✨ Nuevo Producto</sc-if>
+          </h3>
+          <button onClick="{{closeModal}}" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #888;">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- SECCIÓN IMAGEN -->
+          <div style="display: flex; gap: 20px; margin-bottom: 24px; align-items: flex-start; flex-wrap: wrap;">
+            <div style="width: 120px; height: 120px; border: 2px dashed #ccc; border-radius: 8px; background: #fafafa; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; flex-shrink: 0;">
+              <sc-if value="{{f_img}}">
+                <img data-src="{{f_img}}" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" style="max-width: 100%; max-height: 100%; object-fit: contain;"/>
+              </sc-if>
+              <sc-if value="{{!f_img}}">
+                <div style="font-size: 30px; color: #ccc;">📷</div>
+              </sc-if>
+              
+              <sc-if value="{{isUploadingImage}}">
+                <div style="position: absolute; inset: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #457b9d;">Subiendo...</div>
+              </sc-if>
+            </div>
+            <div style="flex-grow: 1; min-width: 200px;">
+              <label style="display: block; font-size: 12px; font-weight: 600; color: #727272; margin-bottom: 6px;">Fotografía del producto</label>
+              <input type="file" accept="image/*" onChange="{{handleImageUpload}}" style="font-size: 12px; margin-bottom: 8px; max-width: 100%;"/>
+              <p style="font-size: 11px; color: #999; margin: 0;">Formatos: JPG, PNG, WEBP. Se recomienda imágenes con fondo transparente.</p>
+              <sc-if value="{{uploadError}}">
+                <div style="color: #e63946; font-size: 12px; margin-top: 4px;">{{uploadError}}</div>
+              </sc-if>
+              <div style="margin-top: 8px;">
+                <label style="font-size: 11px; color: #aaa;">O ruta manual:</label>
+                <input value="{{f_img}}" onChange="{{e => this.handleFormChange('f_img', e.target.value)}}" style="width: 100%; box-sizing: border-box; border: 1px solid #eee; padding: 6px; font-size: 11px; color: #666; margin-top: 2px;" placeholder="images/..."/>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Nombre del Equipo *</label>
+              <input value="{{f_name}}" onChange="{{e => this.handleFormChange('f_name', e.target.value)}}" placeholder="Ej: Chest Press M7Pro"/>
+            </div>
+            
+            <div class="form-group">
+              <label>Código (Item N.º)</label>
+              <input value="{{f_item_no}}" onChange="{{e => this.handleFormChange('f_item_no', e.target.value)}}" placeholder="Ej: M7Pro-1001"/>
+            </div>
+            <div class="form-group">
+              <label>Serie</label>
+              <input value="{{f_series}}" onChange="{{e => this.handleFormChange('f_series', e.target.value)}}" placeholder="Ej: M7Pro, GL, Cardio..."/>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Precio Base Referencia (COP)</label>
+              <input type="text" inputmode="numeric" value="{{f_price}}" onChange="{{e => this.handleFormChange('f_price', e.target.value)}}" placeholder="0"/>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>Dimensiones (L*W*H)</label>
+              <input value="{{f_set_up_dimension}}" onChange="{{e => this.handleFormChange('f_set_up_dimension', e.target.value)}}" placeholder="Ej: 1621*1506*1801mm"/>
+            </div>
+
+            <div class="form-group">
+              <label>NW (Net Weight)</label>
+              <input value="{{f_nw}}" onChange="{{e => this.handleFormChange('f_nw', e.target.value)}}" placeholder="Ej: 175kg"/>
+            </div>
+            <div class="form-group">
+              <label>GW (Gross Weight)</label>
+              <input value="{{f_gw}}" onChange="{{e => this.handleFormChange('f_gw', e.target.value)}}" placeholder="Ej: 215kg"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button onClick="{{closeModal}}" style="background: transparent; border: 1px solid #ccc; color: #666; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+          <button onClick="{{saveProduct}}" disabled="{{isSaving}}" style="background: #1d3557; color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            <sc-if value="{{isSaving}}">⏳ Guardando...</sc-if>
+            <sc-if value="{{!isSaving}}">💾 Guardar Producto</sc-if>
+          </button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = {
+    isAuthenticated: false,
+    loginPassword: '',
+    loginError: false,
+    
+    products: [],
+    filteredProducts: [],
+    searchQuery: '',
+    isLoading: true,
+    
+    // Modal
+    isModalOpen: false,
+    isSaving: false,
+    editingProduct: null, // null si es nuevo
+    
+    // Formulario
+    f_id: '',
+    f_series: '',
+    f_item_no: '',
+    f_name: '',
+    f_price: '',
+    f_set_up_dimension: '',
+    f_nw: '',
+    f_gw: '',
+    f_volume: '',
+    f_img: '',
+    
+    // Subida de imagen
+    isUploadingImage: false,
+    uploadError: ''
+  };
+
+  componentDidMount() {
+    // Check si ya ingresó (en sesión temporal)
+    if (sessionStorage.getItem('fl_admin_auth') === 'true') {
+      this.setState({ isAuthenticated: true }, () => {
+        this.fetchProducts();
+      });
+    } else {
+      this.setState({ isLoading: false });
+    }
+  }
+  
+  onLoginPasswordChange = (e) => {
+    this.setState({ loginPassword: e.target.value, loginError: false });
+  };
+  
+  handleLogin = (e) => {
+    e.preventDefault();
+    if (this.state.loginPassword === 'admin') {
+      sessionStorage.setItem('fl_admin_auth', 'true');
+      this.setState({ isAuthenticated: true, isLoading: true }, () => {
+        this.fetchProducts();
+      });
+    } else {
+      this.setState({ loginError: true });
+    }
+  };
+  
+  handleLogout = () => {
+    sessionStorage.removeItem('fl_admin_auth');
+    this.setState({ isAuthenticated: false, loginPassword: '' });
+  };
+
+  fetchProducts = () => {
+    fetch('api.php?action=get_products&t=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          this.setState({
+            products: data.productos,
+            filteredProducts: data.productos,
+            isLoading: false
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching products:", err);
+        this.setState({ isLoading: false });
+      });
+  };
+
+  onSearchQueryChange = (e) => {
+    const q = e.target.value.toLowerCase();
+    const filtered = this.state.products.filter(p => 
+      (p.name || '').toLowerCase().includes(q) || 
+      (p.item_no || '').toLowerCase().includes(q) ||
+      (p.series || '').toLowerCase().includes(q)
+    );
+    this.setState({ searchQuery: e.target.value, filteredProducts: filtered });
+  };
+
+  openCreateModal = () => {
+    this.setState({
+      isModalOpen: true,
+      editingProduct: null,
+      f_id: '',
+      f_series: '',
+      f_item_no: '',
+      f_name: '',
+      f_price: '',
+      f_set_up_dimension: '',
+      f_nw: '',
+      f_gw: '',
+      f_volume: '',
+      f_img: '',
+      uploadError: ''
+    });
+  };
+
+  openEditModal = (p) => () => {
+    this.setState({
+      isModalOpen: true,
+      editingProduct: p,
+      f_id: p.id,
+      f_series: p.series || '',
+      f_item_no: p.item_no || '',
+      f_name: p.name || '',
+      f_price: p.price || '0',
+      f_set_up_dimension: p.set_up_dimension || '',
+      f_nw: p.nw || '',
+      f_gw: p.gw || '',
+      f_volume: p.volume || '',
+      f_img: p.img || '',
+      uploadError: ''
+    });
+  };
+
+  closeModal = () => {
+    if (!this.state.isSaving) {
+      this.setState({ isModalOpen: false });
+    }
+  };
+
+  handleFormChange = (field, value) => {
+    this.setState({ [field]: value });
+  };
+
+  handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    this.setState({ isUploadingImage: true, uploadError: '' });
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    fetch('api.php?action=upload_product_image', {
+      method: 'POST',
+      body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        this.setState({ f_img: data.img, isUploadingImage: false });
+      } else {
+        this.setState({ uploadError: data.error || 'Error al subir la imagen', isUploadingImage: false });
+      }
+    })
+    .catch(err => {
+      this.setState({ uploadError: 'Error de red al subir la imagen', isUploadingImage: false });
+    });
+  };
+
+  saveProduct = () => {
+    if (!this.state.f_name) {
+      alert("El nombre del producto es obligatorio.");
+      return;
+    }
+
+    this.setState({ isSaving: true });
+
+    const isEditing = !!this.state.editingProduct;
+    const action = isEditing ? 'update_product' : 'create_product';
+
+    const payload = {
+      id: this.state.f_id,
+      series: this.state.f_series,
+      item_no: this.state.f_item_no,
+      name: this.state.f_name,
+      price: this.state.f_price,
+      set_up_dimension: this.state.f_set_up_dimension,
+      nw: this.state.f_nw,
+      gw: this.state.f_gw,
+      volume: this.state.f_volume,
+      img: this.state.f_img
+    };
+
+    fetch('api.php?action=' + action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        this.fetchProducts(); // Recargar lista
+        this.setState({ isModalOpen: false, isSaving: false });
+      } else {
+        alert("Error al guardar: " + data.error);
+        this.setState({ isSaving: false });
+      }
+    })
+    .catch(err => {
+      alert("Error de red");
+      this.setState({ isSaving: false });
+    });
+  };
+
+  deleteProduct = (p) => () => {
+    if (confirm(`¿Estás seguro de que deseas eliminar permanentemente "${p.name}"? Esta acción no se puede deshacer.`)) {
+      fetch('api.php?action=delete_product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: p.id })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          this.fetchProducts();
+        } else {
+          alert("Error: " + data.error);
+        }
+      });
+    }
+  };
+
+  renderVals() {
+    return {
+      // State variables
+      isAuthenticated: this.state.isAuthenticated,
+      loginPassword: this.state.loginPassword,
+      loginError: this.state.loginError,
+      products: this.state.products,
+      filteredProducts: this.state.filteredProducts,
+      searchQuery: this.state.searchQuery,
+      isLoading: this.state.isLoading,
+      isModalOpen: this.state.isModalOpen,
+      isSaving: this.state.isSaving,
+      editingProduct: this.state.editingProduct,
+      f_id: this.state.f_id,
+      f_series: this.state.f_series,
+      f_item_no: this.state.f_item_no,
+      f_name: this.state.f_name,
+      f_price: this.state.f_price,
+      f_set_up_dimension: this.state.f_set_up_dimension,
+      f_nw: this.state.f_nw,
+      f_gw: this.state.f_gw,
+      f_volume: this.state.f_volume,
+      f_img: this.state.f_img,
+      isUploadingImage: this.state.isUploadingImage,
+      uploadError: this.state.uploadError,
+
+      // Methods
+      onLoginPasswordChange: this.onLoginPasswordChange,
+      handleLogin: this.handleLogin,
+      handleLogout: this.handleLogout,
+      onSearchQueryChange: this.onSearchQueryChange,
+      openCreateModal: this.openCreateModal,
+      openEditModal: this.openEditModal,
+      closeModal: this.closeModal,
+      handleFormChange: this.handleFormChange,
+      handleImageUpload: this.handleImageUpload,
+      saveProduct: this.saveProduct,
+      deleteProduct: this.deleteProduct
+    };
+  }
+}
+</script>
+<script>
+// Script para evitar el error 404 de imágenes en la consola
+(function() {
+  function applySrc(img) {
+    const src = img.getAttribute('data-src');
+    if (src && !src.includes('{{')) {
+      img.src = src;
+      img.removeAttribute('data-src');
+    }
+  }
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((m) => {
+      if (m.type === 'attributes' && m.attributeName === 'data-src') {
+        applySrc(m.target);
+      } else if (m.type === 'childList') {
+        m.addedNodes.forEach(node => {
+          if (node.nodeType === 1) {
+            if (node.tagName === 'IMG' && node.hasAttribute('data-src')) applySrc(node);
+            node.querySelectorAll('img[data-src]').forEach(applySrc);
+          }
+        });
+      }
+    });
+  });
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-src'] });
+  document.querySelectorAll('img[data-src]').forEach(applySrc);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  color: oklch(20% .005 270);
+  background: oklch(95% .003 270);
+}
+a {
+  color: oklch(58% .22 25);
+  text-decoration: none;
+}
+a:hover {
+  color: oklch(65% .24 27);
+}
+input, textarea, select {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.panel-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid oklch(90% .006 270);
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+.quotes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.quotes-table th {
+  text-align: left;
+  padding: 14px 10px;
+  border-bottom: 2px solid oklch(90% 0 0);
+  color: oklch(45% .01 270);
+  font-weight: 600;
+}
+.quotes-table td {
+  padding: 14px 10px;
+  border-bottom: 1px solid oklch(95% 0 0);
+  vertical-align: middle;
+}
+.quotes-table tr:hover {
+  background: oklch(98% 0 0);
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 16px;
+    padding: 16px;
+  }
+  .header-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .header-actions a {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+  .table-wrapper {
+    overflow-x: auto;
+    margin: 0 -24px;
+    padding: 0 24px;
+  }
+  .quotes-table {
+    min-width: 700px;
+  }
+}
