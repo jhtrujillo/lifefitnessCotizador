@@ -342,9 +342,8 @@ export default function Cotizador() {
     styleBlock.innerHTML = `* { font-family: Arial, Helvetica, sans-serif !important; }`;
     node.appendChild(styleBlock);
 
-    // Quitar del clon lo que dibujamos con jsPDF o que no debe ir en el cuerpo.
-    node.querySelectorAll('.doc-head, .quote-footer, .pdf-running-header, .pdf-running-footer')
-      .forEach(n => n.remove());
+    // Mantenemos el header y footer en el HTML ya que window.print() los manejará naturalmente.
+    // (Anteriormente se borraban aquí porque html2pdf los dibujaba aparte).
 
     holder.appendChild(node);
     document.body.appendChild(holder);
