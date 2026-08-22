@@ -413,40 +413,8 @@ export default function Cotizador() {
   };
 
   const downloadPdf = () => {
-    const { node, cleanup } = buildCleanNode();
-    const baseUrl = window.location.origin + window.location.pathname.replace('cotizador.html', '');
-    let htmlString = node.innerHTML.replace(new RegExp(baseUrl, 'g'), '');
-    cleanup();
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'api.php?action=generate_pdf_direct';
-    form.target = '_blank'; // Abrir en nueva pestaña
-
-    // HTML input
-    const htmlInput = document.createElement('input');
-    htmlInput.type = 'hidden';
-    htmlInput.name = 'html';
-    htmlInput.value = htmlString;
-    form.appendChild(htmlInput);
-
-    // Filename input
-    const nameInput = document.createElement('input');
-    nameInput.type = 'hidden';
-    nameInput.name = 'filename';
-    nameInput.value = `Cotizacion_${client.quoteNo || '1'}.pdf`;
-    form.appendChild(nameInput);
-
-    // Token for Auth
-    const tokenInput = document.createElement('input');
-    tokenInput.type = 'hidden';
-    tokenInput.name = 'auth_token';
-    tokenInput.value = localStorage.getItem('token') || '';
-    form.appendChild(tokenInput);
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+    // Si el usuario quiere simplemente la opción de imprimir/guardar como PDF nativa
+    window.print();
   };
 
   const generateMessageBody = (isNativeShare = false) => {
@@ -1053,7 +1021,7 @@ export default function Cotizador() {
               <h3 style={{ margin: '0 0 16px', fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', color: '#1d3557', fontSize: '15px' }}>📤 Acciones y Envíos</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button onClick={saveQuote} style={{ background: '#e63946', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>💾 Guardar</button>
-                <button onClick={downloadPdf} style={{ background: '#1d3557', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>⬇️ Descargar PDF</button>
+                <button onClick={downloadPdf} style={{ background: '#1d3557', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🖨️ Imprimir / Guardar PDF</button>
                 <button onClick={sendEmail} style={{ background: '#457b9d', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>✉️ Enviar por Correo</button>
               </div>
             </div>
