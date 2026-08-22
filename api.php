@@ -112,6 +112,8 @@ function get_current_user_obj($pdo) {
         $token = $matches[1];
     } elseif (!empty($_POST['auth_token'])) {
         $token = $_POST['auth_token'];
+    } elseif (!empty($_GET['token'])) {
+        $token = $_GET['token'];
     }
 
     if (!$token) {

@@ -387,14 +387,29 @@ export default function Cotizador() {
   };
 
   const generatePdfFile = async () => {
-    await loadHtml2Pdf();
-    if (!window.html2pdf) {
-      return Promise.reject(new Error("La librería html2pdf no se pudo cargar. Revisa tu conexión a internet."));
+    const { node, cleanup } = buildCleanNode();
+    const baseUrl = window.location.origin + window.location.pathname.replace('cotizador.html', '');
+    let htmlString = node.innerHTML.replace(new RegExp(baseUrl, 'g'), '');
+    cleanup();
+
+    try {
+      const response = await fetchWithAuth('generate_pdf', {
+        method: 'POST',
+        body: { html: htmlString }
+      });
+      if (response.success && response.pdf) {
+        const byteCharacters = atob(response.pdf);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        return new File([blob], `Cotizacion_${client.quoteNo || '1'}.pdf`, { type: 'application/pdf' });
+      }
+      throw new Error(response.error || "Error al generar PDF en el servidor.");
+    } catch (err) {
+      console.error(err);
+      throw new Error("Error al generar el PDF en el servidor: " + err.message);
     }
-    return buildPdf().then(({ pdf, filename }) => {
-      const blob = pdf.output('blob');
-      return new File([blob], filename, { type: 'application/pdf' });
-    });
   };
 
   const downloadPdf = () => {
