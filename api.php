@@ -104,30 +104,22 @@ try {
 // Helper: Obtener usuario autenticado
 function get_current_user_obj($pdo) {
     $authHeader = '';
-    if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-        $authHeader = trim($_SERVER['HTTP_AUTHORIZATION']);
-    } elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-        $authHeader = trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
-    } elseif (function_exists('apache_request_headers')) {
-        $headers = apache_request_headers();
-        if (isset($headers['Authorization'])) {
-            $authHeader = trim($headers['Authorization']);
-        } elseif (isset($headers['authorization'])) {
-            $authHeader = trim($headers['authorization']);
-        }
-    }
+    $headers = apache_request_headers();
+    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
+    $token = null;
 
-    $token = '';
-    if ($authHeader && strpos($authHeader, 'Bearer ') === 0) {
-        $token = substr($authHeader, 7);
-    } elseif (isset($_GET['token'])) {
-        $token = $_GET['token'];
+    if ($authHeader && preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+        $token = $matches[1];
+    } elseif (!empty($_POST['auth_token'])) {
+        $token = $_POST['auth_token'];
     }
 
     if (!$token) {
-        return null;
+        echo json_encode(["success" => false, "error" => "Token no proporcionado", "auth_failed" => true]);
+        exit;
     }
-    $stmt = $pdo->prepare("SELECT id, username, nombre, rol FROM usuarios WHERE token = ?");
+
+    $stmt = $pdo->prepare("SELECT id, username, rol, nombre FROM usuarios WHERE token = ?");
     $stmt->execute([$token]);
     return $stmt->fetch();
 }
@@ -483,6 +475,43 @@ elseif ($action === 'get_next_quote_no') {
         echo json_encode(["success" => true, "quote_no" => $quoteNo]);
     } catch (Exception $e) {
         echo json_encode(["success" => false, "error" => $e->getMessage()]);
+    }
+} elseif ($action === 'generate_pdf_direct') {
+    require_auth($pdo);
+    try {
+        $html = $_POST['html'] ?? '';
+        $filename = $_POST['filename'] ?? 'Cotizacion.pdf';
+        
+        require 'libs/vendor/autoload.php';
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', true);
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        $fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+            body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #333; }
+            .print-container { width: 100%; max-width: 100%; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th { background-color: #2d2d2d; color: white; padding: 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+            td { padding: 8px; vertical-align: top; border-bottom: 1px solid #e0e0e0; }
+            .totals-bg { background-color: #e63946; color: white; padding: 10px; font-weight: bold; font-size: 16px; border-radius: 4px; }
+            .doc-head img { height: 60px; }
+            .info-grid-mobile { width: 100%; }
+            .info-grid-mobile > div { display: inline-block; width: 48%; vertical-align: top; }
+        </style></head><body>' . $html . '</body></html>';
+        
+        $dompdf->loadHtml($fullHtml);
+        $dompdf->setPaper('letter', 'portrait');
+        $dompdf->render();
+        
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: inline; filename="' . $filename . '"');
+        header('Cache-Control: private, max-age=0, must-revalidate');
+        header('Pragma: public');
+        
+        echo $dompdf->output();
+        exit;
+    } catch (Exception $e) {
+        die("Error generando PDF: " . $e->getMessage());
     }
 } elseif ($action === 'generate_pdf') {
     require_auth($pdo);

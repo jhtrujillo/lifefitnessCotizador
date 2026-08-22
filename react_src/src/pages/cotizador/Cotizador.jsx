@@ -412,20 +412,41 @@ export default function Cotizador() {
     }
   };
 
-  const downloadPdf = async () => {
-    try {
-      const file = await generatePdfFile();
-      const url = URL.createObjectURL(file);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      alert(err.message);
-    }
+  const downloadPdf = () => {
+    const { node, cleanup } = buildCleanNode();
+    const baseUrl = window.location.origin + window.location.pathname.replace('cotizador.html', '');
+    let htmlString = node.innerHTML.replace(new RegExp(baseUrl, 'g'), '');
+    cleanup();
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'api.php?action=generate_pdf_direct';
+    form.target = '_blank'; // Abrir en nueva pestaña
+
+    // HTML input
+    const htmlInput = document.createElement('input');
+    htmlInput.type = 'hidden';
+    htmlInput.name = 'html';
+    htmlInput.value = htmlString;
+    form.appendChild(htmlInput);
+
+    // Filename input
+    const nameInput = document.createElement('input');
+    nameInput.type = 'hidden';
+    nameInput.name = 'filename';
+    nameInput.value = `Cotizacion_${client.quoteNo || '1'}.pdf`;
+    form.appendChild(nameInput);
+
+    // Token for Auth
+    const tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = 'auth_token';
+    tokenInput.value = localStorage.getItem('token') || '';
+    form.appendChild(tokenInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   };
 
   const generateMessageBody = (isNativeShare = false) => {
