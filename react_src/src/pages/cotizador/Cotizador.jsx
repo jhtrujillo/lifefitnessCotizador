@@ -332,10 +332,10 @@ export default function Cotizador() {
     const sourceHTML = cell ? cell.innerHTML : (container ? container.innerHTML : '');
 
     const holder = document.createElement('div');
-    holder.style.cssText = 'position:absolute; left:0; top:0; z-index:-9999; visibility: hidden; width: 720px; text-align: left; overflow: hidden;';
+    holder.style.cssText = 'position:fixed; left:-10000px; top:0; z-index:-1;';
     const node = document.createElement('div');
     node.className = 'print-container pdf-doc';
-    node.style.cssText = 'padding:0; margin:0; max-width:none; width:720px; background:#ffffff; text-align: left; transform: none !important; left: 0; position: relative;';
+    node.style.cssText = 'padding:0; margin:0; max-width:none; width:720px; background:#ffffff;';
     node.innerHTML = sourceHTML;
     // Quitar del clon lo que dibujamos con jsPDF o que no debe ir en el cuerpo.
     node.querySelectorAll('.doc-head, .quote-footer, .pdf-running-header, .pdf-running-footer')
@@ -364,7 +364,7 @@ export default function Cotizador() {
       margin:      [1.05, 0.4, 0.7, 0.4],
       filename:    `Cotizacion_${client.quoteNo || '1'}.pdf`,
       image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 720 },
+      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollY: 0, windowWidth: 720, width: 720 },
       jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' },
       pagebreak:   { mode: ['css', 'legacy'] }
     };
