@@ -328,8 +328,7 @@ export default function Cotizador() {
   // dejaba huecos en el PDF. El encabezado/pie los dibuja jsPDF por página.
   const buildCleanNode = () => {
     const container = document.querySelector('.print-container');
-    const cell = container ? container.querySelector('.pdf-frame > tbody > tr > td') : null;
-    const sourceHTML = cell ? cell.innerHTML : (container ? container.innerHTML : '');
+    const sourceHTML = container ? container.innerHTML : '';
 
     const holder = document.createElement('div');
     holder.style.cssText = 'position:fixed; left:200%; top:0; z-index:-9999;';

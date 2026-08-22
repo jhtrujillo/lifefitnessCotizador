@@ -350,7 +350,7 @@ input, textarea, select {
 .pdf-exporting .pdf-frame > thead,
 .pdf-exporting .pdf-frame > tfoot { display: none !important; }
 
-.pdf-running-header img { height: 46px; width: auto; object-fit: contain; }
+.pdf-running-header img { max-height: 46px; max-width: 250px; display: block; }
 .pdf-running-header .rh-title {
   font-family: 'Oswald', sans-serif; font-size: 24px; font-weight: 700;
   text-transform: uppercase;  line-height: 1; color: #2d2d2d;
