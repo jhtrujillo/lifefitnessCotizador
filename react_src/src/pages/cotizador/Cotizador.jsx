@@ -332,7 +332,7 @@ export default function Cotizador() {
     const sourceHTML = cell ? cell.innerHTML : (container ? container.innerHTML : '');
 
     const holder = document.createElement('div');
-    holder.style.cssText = 'position:absolute; left:0; top:0; z-index:-9999;';
+    holder.style.cssText = 'position:fixed; left:200%; top:0; z-index:-9999;';
     const node = document.createElement('div');
     node.className = 'print-container pdf-doc';
     node.style.cssText = 'padding:0; margin:0; max-width:none; width:720px; background:#ffffff; text-rendering: geometricPrecision; font-kerning: none; font-variant-ligatures: none; word-spacing: 0px; letter-spacing: 0.1px; font-family: Arial, Helvetica, sans-serif !important;';
@@ -386,35 +386,25 @@ export default function Cotizador() {
   };
 
   const generatePdfFile = async () => {
-    const { node, cleanup } = buildCleanNode();
-    const baseUrl = window.location.origin + window.location.pathname.replace('cotizador.html', '');
-    // Asegurar que TODAS las rutas (assets y uploads) sean relativas para que Dompdf las lea del disco duro sin usar HTTP
-    let htmlString = node.innerHTML.replace(new RegExp(baseUrl, 'g'), '');
-    cleanup();
-
-    try {
-      const response = await fetchWithAuth('generate_pdf', {
-        method: 'POST',
-        body: { html: htmlString }
-      });
-      if (response.success && response.pdf) {
-        const byteCharacters = atob(response.pdf);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-        return new File([blob], `Cotizacion_${client.quoteNo || '1'}.pdf`, { type: 'application/pdf' });
-      }
-      throw new Error(response.error || "Error al generar PDF en el servidor.");
-    } catch (err) {
-      console.error(err);
-      throw new Error("No se pudo conectar con el generador de PDF.");
+    await loadHtml2Pdf();
+    if (!window.html2pdf) {
+      return Promise.reject(new Error("La librería html2pdf no se pudo cargar. Revisa tu conexión a internet."));
     }
+    return buildPdf().then(({ pdf, filename }) => {
+      const blob = pdf.output('blob');
+      return new File([blob], filename, { type: 'application/pdf' });
+    });
   };
 
-  const downloadPdf = () => {
-    // Si el usuario quiere simplemente la opción de imprimir/guardar como PDF nativa
-    window.print();
+  const downloadPdf = async () => {
+    await loadHtml2Pdf();
+    if (!window.html2pdf) {
+      alert("No se pudo cargar el generador de PDF. Revisa tu conexión a internet.");
+      return;
+    }
+    buildPdf()
+      .then(({ pdf, filename }) => { pdf.save(filename); })
+      .catch(err => { console.error(err); alert("Ocurrió un error al generar el PDF."); });
   };
 
   const generateMessageBody = (isNativeShare = false) => {
@@ -1021,7 +1011,7 @@ export default function Cotizador() {
               <h3 style={{ margin: '0 0 16px', fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', color: '#1d3557', fontSize: '15px' }}>📤 Acciones y Envíos</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button onClick={saveQuote} style={{ background: '#e63946', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>💾 Guardar</button>
-                <button onClick={downloadPdf} style={{ background: '#1d3557', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>🖨️ Imprimir / Guardar PDF</button>
+                <button onClick={downloadPdf} style={{ background: '#1d3557', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>⬇️ Descargar PDF</button>
                 <button onClick={sendEmail} style={{ background: '#457b9d', color: 'white', border: 'none', padding: '12px', borderRadius: '6px', fontFamily: 'Oswald, sans-serif', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>✉️ Enviar por Correo</button>
               </div>
             </div>
