@@ -326,7 +326,7 @@ export default function Cotizador() {
   // Construye un CLON limpio con SOLO el contenido del cuerpo (sin el marco de tabla
   // ni encabezados/pies ocultos). Así html2canvas no reserva espacio fantasma que
   // dejaba huecos en el PDF. El encabezado/pie los dibuja jsPDF por página.
-  const buildCleanNode = () => {
+  const buildCleanNode = (forNativePrint = false) => {
     const container = document.querySelector('.print-container');
     const sourceHTML = container ? container.innerHTML : '';
 
@@ -341,8 +341,11 @@ export default function Cotizador() {
     styleBlock.innerHTML = `* { font-family: Arial, Helvetica, sans-serif !important; }`;
     node.appendChild(styleBlock);
 
-    // Mantenemos el header y footer en el HTML ya que window.print() los manejará naturalmente.
-    // (Anteriormente se borraban aquí porque html2pdf los dibujaba aparte).
+    if (!forNativePrint) {
+      // Para html2pdf, borramos el header/footer nativo porque los dibujamos manualmente con jsPDF
+      node.querySelectorAll('.doc-head, .quote-footer, .pdf-running-header, .pdf-running-footer')
+        .forEach(n => n.remove());
+    }
 
     holder.appendChild(node);
     document.body.appendChild(holder);
@@ -367,7 +370,7 @@ export default function Cotizador() {
       margin:      [1.05, 0.4, 0.7, 0.4],
       filename:    `Cotizacion_${client.quoteNo || '1'}.pdf`,
       image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollY: 0 },
+      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollY: 0, letterRendering: true },
       jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' },
       pagebreak:   { mode: ['css', 'legacy'] }
     };
@@ -384,33 +387,18 @@ export default function Cotizador() {
   };
 
   const generatePdfFile = async () => {
-    const { node, cleanup } = buildCleanNode();
-    const baseUrl = window.location.origin + window.location.pathname.replace('cotizador.html', '');
-    let htmlString = node.innerHTML.replace(new RegExp(baseUrl, 'g'), '');
-    cleanup();
-
-    try {
-      const response = await fetchWithAuth('generate_pdf', {
-        method: 'POST',
-        body: { html: htmlString }
-      });
-      if (response.success && response.pdf) {
-        const byteCharacters = atob(response.pdf);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-        return new File([blob], `Cotizacion_${client.quoteNo || '1'}.pdf`, { type: 'application/pdf' });
-      }
-      throw new Error(response.error || "Error al generar PDF en el servidor.");
-    } catch (err) {
-      console.error(err);
-      throw new Error("No se pudo conectar con el generador de PDF del servidor.");
+    await loadHtml2Pdf();
+    if (!window.html2pdf) {
+      return Promise.reject(new Error("La librería html2pdf no se pudo cargar. Revisa tu conexión a internet."));
     }
+    return buildPdf().then(({ pdf, filename }) => {
+      const blob = pdf.output('blob');
+      return new File([blob], filename, { type: 'application/pdf' });
+    });
   };
 
   const downloadPdf = () => {
-    const { node, cleanup } = buildCleanNode();
+    const { node, cleanup } = buildCleanNode(true);
     
     // Forzamos estilos para que la ventana de impresión nativa salga enriquecida y exacta
     const style = document.createElement('style');
