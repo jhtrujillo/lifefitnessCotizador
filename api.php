@@ -545,9 +545,11 @@ elseif ($action === 'get_next_quote_no') {
         $dompdf = new \Dompdf\Dompdf($options);
         $dompdf->setBasePath(__DIR__);
         
-        // Forzar rutas absolutas con HTTPS para que Dompdf descargue las imágenes sin bloqueos locales
-        $baseUrl = 'https://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/';
-        $html = preg_replace('/src="(?!(http|data:|\/))([^"]+)"/i', 'src="' . $baseUrl . '$2"', $html);
+        // Forzar rutas absolutas locales y decodificar %20 a espacios reales
+        // Esto evita errores de HTTP o bloqueos de Dompdf con caracteres especiales en los nombres de archivo
+        $html = preg_replace_callback('/src="(?!(http|data:|\/))([^"]+)"/i', function($matches) {
+            return 'src="' . __DIR__ . '/' . urldecode($matches[2]) . '"';
+        }, $html);
         
         $fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
             body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #333; }
