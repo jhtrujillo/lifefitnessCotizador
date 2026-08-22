@@ -545,8 +545,9 @@ elseif ($action === 'get_next_quote_no') {
         $dompdf = new \Dompdf\Dompdf($options);
         $dompdf->setBasePath(__DIR__);
         
-        // Forzar rutas absolutas locales para que Dompdf encuentre las imágenes
-        $html = preg_replace('/src="(?!(http|data:|\/))([^"]+)"/i', 'src="' . __DIR__ . '/$1"', $html);
+        // Forzar rutas absolutas con HTTPS para que Dompdf descargue las imágenes sin bloqueos locales
+        $baseUrl = 'https://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/';
+        $html = preg_replace('/src="(?!(http|data:|\/))([^"]+)"/i', 'src="' . $baseUrl . '$2"', $html);
         
         $fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
             body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #333; }
@@ -558,8 +559,8 @@ elseif ($action === 'get_next_quote_no') {
             .doc-head img { height: 60px; }
             
             /* Compatibilidad de Flex y Grid para Dompdf */
-            .pdf-meta { width: 100%; display: block !important; margin-bottom: 30px; }
-            .pdf-meta > div { display: inline-block !important; width: 48% !important; vertical-align: top !important; }
+            .info-grid-mobile { width: 100%; display: block !important; margin-bottom: 30px; }
+            .info-grid-mobile > div { display: inline-block !important; width: 48% !important; vertical-align: top !important; }
             div[style*="display: flex"], div[style*="display:flex"] { display: block !important; }
         </style></head><body>' . $html . '</body></html>';
         
