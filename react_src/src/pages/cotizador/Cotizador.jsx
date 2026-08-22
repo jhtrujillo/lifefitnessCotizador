@@ -417,13 +417,16 @@ export default function Cotizador() {
     printContainer.appendChild(node);
     document.body.appendChild(printContainer);
 
-    // Lanzar diálogo de impresión nativo inmediatamente (sin nueva pestaña)
-    window.print();
-
-    // Limpieza rápida para restaurar la pantalla
-    document.body.removeChild(printContainer);
-    document.head.removeChild(style);
-    cleanup();
+    // Lanzar diálogo de impresión nativo después de un pequeño retraso
+    // para permitir que Safari renderice la imagen del logo inyectada
+    setTimeout(() => {
+      window.print();
+      
+      // Limpieza rápida para restaurar la pantalla
+      document.body.removeChild(printContainer);
+      document.head.removeChild(style);
+      cleanup();
+    }, 250);
   };
 
   const generateMessageBody = (isNativeShare = false) => {
@@ -1071,8 +1074,8 @@ export default function Cotizador() {
           <table style={{ width: '100%', border: 'none', margin: 0, padding: 0 }}>
             <tbody>
               <tr>
-                <td style={{ verticalAlign: 'top', border: 'none', padding: 0 }}>
-                  <img src="assets/logo.png" alt="Fitness Life S.A.S" style={{ height: '72px', width: 'auto' }} />
+                <td style={{ width: '50%', textAlign: 'left', verticalAlign: 'middle', border: 'none', padding: 0 }}>
+                  <img src="assets/logo.png" alt="Fitness Life" style={{ maxWidth: '250px', maxHeight: '70px', display: 'block' }} />
                 </td>
                 <td style={{ verticalAlign: 'top', textAlign: 'right', border: 'none', padding: 0 }}>
                   <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '30px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1, color: '#2d2d2d' }}>Cotización</div>
