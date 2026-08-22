@@ -350,9 +350,10 @@ export default function Cotizador() {
     styleBlock.innerHTML = `* { font-family: Arial, Helvetica, sans-serif !important; }`;
     node.appendChild(styleBlock);
 
+    // No removemos .doc-head ni .quote-footer porque el servidor (Dompdf) 
+    // necesita renderizarlos.
     if (!forNativePrint) {
-      // Quitamos lo sobrante en el modo de render del servidor
-      node.querySelectorAll('.doc-head, .quote-footer, .pdf-running-header, .pdf-running-footer')
+      node.querySelectorAll('.pdf-running-header, .pdf-running-footer')
         .forEach(n => n.remove());
     }
 

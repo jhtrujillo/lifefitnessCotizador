@@ -541,7 +541,12 @@ elseif ($action === 'get_next_quote_no') {
         require 'libs/vendor/autoload.php';
         $options = new \Dompdf\Options();
         $options->set('isRemoteEnabled', true);
+        $options->setChroot(__DIR__);
         $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->setBasePath(__DIR__);
+        
+        // Forzar rutas absolutas locales para que Dompdf encuentre las imágenes
+        $html = preg_replace('/src="(?!(http|data:|\/))([^"]+)"/i', 'src="' . __DIR__ . '/$1"', $html);
         
         $fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
             body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #333; }
