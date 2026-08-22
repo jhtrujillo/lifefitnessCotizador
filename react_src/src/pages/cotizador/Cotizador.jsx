@@ -397,14 +397,33 @@ export default function Cotizador() {
   };
 
   const downloadPdf = async () => {
+    // Abrir ventana inmediatamente para engañar al bloqueador de popups de Safari
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write('<div style="font-family:sans-serif; text-align:center; margin-top:50px;">Generando documento, por favor espera...</div>');
+    }
+
     await loadHtml2Pdf();
     if (!window.html2pdf) {
+      if (newWindow) newWindow.close();
       alert("No se pudo cargar el generador de PDF. Revisa tu conexión a internet.");
       return;
     }
+    
     buildPdf()
-      .then(({ pdf, filename }) => { pdf.save(filename); })
-      .catch(err => { console.error(err); alert("Ocurrió un error al generar el PDF."); });
+      .then(({ pdf }) => {
+        const blobUrl = pdf.output('bloburl');
+        if (newWindow) {
+          newWindow.location.href = blobUrl;
+        } else {
+          window.location.href = blobUrl;
+        }
+      })
+      .catch(err => { 
+        if (newWindow) newWindow.close();
+        console.error(err); 
+        alert("Ocurrió un error al generar el PDF."); 
+      });
   };
 
   const generateMessageBody = (isNativeShare = false) => {
