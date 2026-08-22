@@ -13,6 +13,7 @@ export default function Cotizador() {
   
   // Products
   const [productsList, setProductsList] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productSearchQuery, setProductSearchQuery] = useState('');
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   
@@ -126,6 +127,7 @@ export default function Cotizador() {
   };
 
   const fetchProducts = () => {
+    setIsLoadingProducts(true);
     fetchWithAuth('get_products')
       .then(data => {
         if (data.success) {
@@ -141,8 +143,12 @@ export default function Cotizador() {
           }));
           setProductsList(mapped);
         }
+        setIsLoadingProducts(false);
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        setIsLoadingProducts(false);
+      });
   };
 
   const handleLogout = () => {
@@ -806,24 +812,33 @@ export default function Cotizador() {
               
               {showProductSuggestions && (
                 <div style={{ position: 'absolute', top: '100%', left: 24 + 'px', right: 24 + 'px', marginTop: '8px', background: 'white', border: '1px solid #d8d8d8', borderRadius: '6px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 999, maxHeight: '350px', overflowY: 'auto' }}>
-                  {filteredProducts.map(p => (
-                    <div 
-                      key={p.id} 
-                      onClick={() => selectProduct(p)} 
-                      style={{ padding: '12px 16px', borderBottom: '1px solid #f2f2f2', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'background 0.2s' }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#f7f7f7'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                    >
-                      <img src={p.img || 'assets/cat_pesas.jpg'} style={{ width: '48px', height: '36px', objectFit: 'contain', background: '#fafafa', border: '1px solid #eee', borderRadius: '4px' }} alt="" />
-                      <div style={{ flexGrow: 1 }}>
-                        <div style={{ fontWeight: 600, fontSize: '13px', color: '#2d2d2d' }}>{p.name}</div>
-                        <div style={{ fontSize: '11px', color: '#888' }}>{p.desc}</div>
-                      </div>
-                      <div style={{ fontWeight: 700, color: '#e63946', fontSize: '13px' }}>{fmt(p.price)}</div>
+                  {isLoadingProducts ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#666', fontSize: '13px' }}>
+                      <span className="loading-spinner" style={{ display: 'inline-block', width: '16px', height: '16px', border: '2px solid #ccc', borderTopColor: '#e63946', borderRadius: '50%', animation: 'spin 1s linear infinite', marginRight: '8px', verticalAlign: 'middle' }}></span>
+                      Cargando productos...
                     </div>
-                  ))}
-                  {pQuery.length > 0 && filteredProducts.length === 0 && (
-                    <div style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '13px' }}>No se encontraron productos con esa búsqueda.</div>
+                  ) : (
+                    <>
+                      {filteredProducts.map(p => (
+                        <div 
+                          key={p.id} 
+                          onClick={() => selectProduct(p)} 
+                          style={{ padding: '12px 16px', borderBottom: '1px solid #f2f2f2', display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', transition: 'background 0.2s' }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = '#f7f7f7'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                        >
+                          <img src={p.img || 'assets/cat_pesas.jpg'} style={{ width: '48px', height: '36px', objectFit: 'contain', background: '#fafafa', border: '1px solid #eee', borderRadius: '4px' }} alt="" />
+                          <div style={{ flexGrow: 1 }}>
+                            <div style={{ fontWeight: 600, fontSize: '13px', color: '#2d2d2d' }}>{p.name}</div>
+                            <div style={{ fontSize: '11px', color: '#888' }}>{p.desc}</div>
+                          </div>
+                          <div style={{ fontWeight: 700, color: '#e63946', fontSize: '13px' }}>{fmt(p.price)}</div>
+                        </div>
+                      ))}
+                      {pQuery.length > 0 && filteredProducts.length === 0 && (
+                        <div style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '13px' }}>No se encontraron productos con esa búsqueda.</div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
