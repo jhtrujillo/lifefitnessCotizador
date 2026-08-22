@@ -328,7 +328,16 @@ export default function Cotizador() {
   // dejaba huecos en el PDF. El encabezado/pie los dibuja jsPDF por página.
   const buildCleanNode = (forNativePrint = false) => {
     const container = document.querySelector('.print-container');
-    const sourceHTML = container ? container.innerHTML : '';
+    let sourceHTML = '';
+
+    if (forNativePrint) {
+      // Para impresión nativa, tomamos toda la estructura (incluyendo thead/tfoot)
+      sourceHTML = container ? container.innerHTML : '';
+    } else {
+      // Para Dompdf y envíos, extraemos solo el contenido limpio del tbody td para evitar tablas anidadas vacías
+      const cell = container ? container.querySelector('.pdf-frame > tbody > tr > td') : null;
+      sourceHTML = cell ? cell.innerHTML : (container ? container.innerHTML : '');
+    }
 
     const holder = document.createElement('div');
     holder.style.cssText = 'position:fixed; left:200%; top:0; z-index:-9999;';
@@ -342,7 +351,7 @@ export default function Cotizador() {
     node.appendChild(styleBlock);
 
     if (!forNativePrint) {
-      // Para html2pdf, borramos el header/footer nativo porque los dibujamos manualmente con jsPDF
+      // Quitamos lo sobrante en el modo de render del servidor
       node.querySelectorAll('.doc-head, .quote-footer, .pdf-running-header, .pdf-running-footer')
         .forEach(n => n.remove());
     }
