@@ -1155,7 +1155,7 @@ export default function Cotizador() {
               {items.map((row, idx) => (
                 <tr key={row.id} style={{ borderBottom: '1px solid #e0e0e0' }}>
                   <td data-label="Imagen" className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'top', textAlign: 'center' }}>
-                    <div className="row-img" style={{ width: '84px', height: '66px', border: '1px dashed #c6c6c6', background: '#f7f7f7', overflow: 'hidden', borderRadius: '4px', margin: '0 auto', textAlign: 'center', display: 'table-cell', verticalAlign: 'middle' }}>
+                    <div className="row-img" style={{ width: '84px', height: '66px', border: '1px dashed #c6c6c6', background: '#f7f7f7', overflow: 'hidden', borderRadius: '4px', margin: '0 auto', textAlign: 'center', display: 'block', verticalAlign: 'middle' }}>
                       <img src={row.img} alt="" style={{ maxWidth: '80px', maxHeight: '60px', width: 'auto', height: 'auto' }} />
                     </div>
                   </td>

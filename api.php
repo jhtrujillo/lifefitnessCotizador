@@ -529,6 +529,9 @@ elseif ($action === 'get_next_quote_no') {
         // por separate + border-spacing: 0 (visualmente idéntico pero seguro contra caídas de página)
         $html = preg_replace('/border-collapse\s*:\s*collapse/i', 'border-collapse: separate; border-spacing: 0;', $html);
         
+        // Evitar otro bug fatal de Dompdf: "display: table-cell" dentro de un <td> colapsa el layout
+        $html = preg_replace('/display\s*:\s*table-cell/i', 'display: block', $html);
+        
         if (!file_exists('libs/vendor/autoload.php')) {
             ob_end_clean();
             echo json_encode(["success" => false, "error" => "El directorio 'libs/vendor' no se encuentra en el servidor. Por favor, sube la carpeta 'libs' completa a DreamHost."]);
