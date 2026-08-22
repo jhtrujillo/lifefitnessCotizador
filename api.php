@@ -562,6 +562,7 @@ elseif ($action === 'get_next_quote_no') {
         echo json_encode(["success" => true, "pdf" => base64_encode($dompdf->output())]);
     } catch (\Throwable $e) {
         ob_end_clean();
+        file_put_contents('crash_html.txt', $html);
         echo json_encode(["success" => false, "error" => "Fallo interno en el generador de PDF: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine()]);
     }
 } elseif ($action === 'send_email') {
