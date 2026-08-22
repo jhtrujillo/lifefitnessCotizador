@@ -332,7 +332,7 @@ export default function Cotizador() {
     const sourceHTML = cell ? cell.innerHTML : (container ? container.innerHTML : '');
 
     const holder = document.createElement('div');
-    holder.style.cssText = 'position:fixed; left:-10000px; top:0; z-index:-1;';
+    holder.style.cssText = 'position:absolute; left:0; top:0; z-index:-9999;';
     const node = document.createElement('div');
     node.className = 'print-container pdf-doc';
     node.style.cssText = 'padding:0; margin:0; max-width:none; width:720px; background:#ffffff;';
@@ -364,7 +364,7 @@ export default function Cotizador() {
       margin:      [1.05, 0.4, 0.7, 0.4],
       filename:    `Cotizacion_${client.quoteNo || '1'}.pdf`,
       image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollY: 0, windowWidth: 720, width: 720 },
+      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollY: 0 },
       jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' },
       pagebreak:   { mode: ['css', 'legacy'] }
     };
