@@ -335,7 +335,7 @@ export default function Cotizador() {
     holder.style.cssText = 'position:absolute; left:0; top:0; z-index:-9999;';
     const node = document.createElement('div');
     node.className = 'print-container pdf-doc';
-    node.style.cssText = 'padding:0; margin:0; max-width:none; width:720px; background:#ffffff;';
+    node.style.cssText = 'padding:0; margin:0; max-width:none; width:720px; background:#ffffff; text-rendering: geometricPrecision; font-kerning: none; font-variant-ligatures: none; word-spacing: 0px; letter-spacing: 0.1px;';
     node.innerHTML = sourceHTML;
     // Quitar del clon lo que dibujamos con jsPDF o que no debe ir en el cuerpo.
     node.querySelectorAll('.doc-head, .quote-footer, .pdf-running-header, .pdf-running-footer')
@@ -1102,7 +1102,7 @@ export default function Cotizador() {
                   </td>
                   <td data-label="Descripción" className="desc-cell" style={{ padding: '12px 10px', verticalAlign: 'top' }}>
                     <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px', color: '#333333' }}>{row.name}</div>
-                    <div style={{ fontSize: '11.5px', color: '#727272', lineHeight: '1.5', whiteSpace: 'pre-wrap', textAlign: 'justify' }}>{row.desc}</div>
+                    <div style={{ fontSize: '11.5px', color: '#727272', lineHeight: '1.5', whiteSpace: 'pre-wrap', textAlign: 'left' }}>{row.desc}</div>
                   </td>
                   <td data-label="Cant." style={{ padding: '12px 10px', textAlign: 'center', verticalAlign: 'top', fontWeight: 600, fontSize: '14px' }}>{row.qty}</td>
                   <td data-label="Vr. Unitario" style={{ padding: '12px 10px', textAlign: 'right', verticalAlign: 'top', color: '#595959' }}>{fmt(row.price)}</td>
