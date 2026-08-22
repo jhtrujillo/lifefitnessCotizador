@@ -518,9 +518,19 @@ elseif ($action === 'get_next_quote_no') {
 } elseif ($action === 'generate_pdf') {
     require_auth($pdo);
     try {
+        ini_set('memory_limit', '256M');
+        set_time_limit(60);
         ob_start(); // Prevent warnings from breaking JSON
+        
         $input = json_decode(file_get_contents('php://input'), true);
         $html = $input['html'] ?? '';
+        
+        if (!file_exists('libs/vendor/autoload.php')) {
+            ob_end_clean();
+            echo json_encode(["success" => false, "error" => "El directorio 'libs/vendor' no se encuentra en el servidor. Por favor, sube la carpeta 'libs' completa a DreamHost."]);
+            exit;
+        }
+        
         require 'libs/vendor/autoload.php';
         $options = new \Dompdf\Options();
         $options->set('isRemoteEnabled', true);
@@ -543,9 +553,9 @@ elseif ($action === 'get_next_quote_no') {
         $dompdf->render();
         ob_end_clean(); // Discard any warnings/errors printed
         echo json_encode(["success" => true, "pdf" => base64_encode($dompdf->output())]);
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
         ob_end_clean();
-        echo json_encode(["success" => false, "error" => $e->getMessage()]);
+        echo json_encode(["success" => false, "error" => "Fallo interno en el generador de PDF: " . $e->getMessage()]);
     }
 } elseif ($action === 'send_email') {
     require_auth($pdo);
