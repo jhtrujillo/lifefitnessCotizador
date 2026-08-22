@@ -542,6 +542,7 @@ elseif ($action === 'get_next_quote_no') {
         $options = new \Dompdf\Options();
         $options->set('isRemoteEnabled', true);
         $options->setChroot(__DIR__);
+        $options->setDpi(115); // Aumentar DPI para escalar (encoger) el documento y que coincida con el tamaño de impresión nativo
         $dompdf = new \Dompdf\Dompdf($options);
         $dompdf->setBasePath(__DIR__);
         
