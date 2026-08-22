@@ -335,7 +335,7 @@ export default function Cotizador() {
       sourceHTML = container ? container.innerHTML : '';
     } else {
       // Para Dompdf y envíos, extraemos solo el contenido limpio del tbody td para evitar tablas anidadas vacías
-      const cell = container ? container.querySelector('.pdf-frame > tbody > tr > td') : null;
+      const cell = container ? container.querySelector('.pdf-main-body-cell') : null;
       sourceHTML = cell ? cell.innerHTML : (container ? container.innerHTML : '');
     }
 
@@ -1093,7 +1093,7 @@ export default function Cotizador() {
             </td></tr>
           </tfoot>
           <tbody>
-            <tr><td>
+            <tr><td className="pdf-main-body-cell">
 
         {/* Cabecera */}
         <div className="doc-head" style={{ width: '100%', borderBottom: '3px solid #e63946', paddingBottom: '18px', marginBottom: '26px' }}>
