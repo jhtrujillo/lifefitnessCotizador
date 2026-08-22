@@ -487,6 +487,7 @@ elseif ($action === 'get_next_quote_no') {
 } elseif ($action === 'generate_pdf') {
     require_auth($pdo);
     try {
+        ob_start(); // Prevent warnings from breaking JSON
         $input = json_decode(file_get_contents('php://input'), true);
         $html = $input['html'] ?? '';
         require 'libs/vendor/autoload.php';
@@ -509,8 +510,10 @@ elseif ($action === 'get_next_quote_no') {
         $dompdf->loadHtml($fullHtml);
         $dompdf->setPaper('letter', 'portrait');
         $dompdf->render();
+        ob_end_clean(); // Discard any warnings/errors printed
         echo json_encode(["success" => true, "pdf" => base64_encode($dompdf->output())]);
     } catch (Exception $e) {
+        ob_end_clean();
         echo json_encode(["success" => false, "error" => $e->getMessage()]);
     }
 } elseif ($action === 'send_email') {

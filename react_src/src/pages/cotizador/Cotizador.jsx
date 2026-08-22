@@ -387,7 +387,9 @@ export default function Cotizador() {
 
   const generatePdfFile = async () => {
     const { node, cleanup } = buildCleanNode();
-    const htmlString = node.innerHTML;
+    const baseUrl = window.location.origin + window.location.pathname.replace('cotizador.html', '');
+    // Asegurar que TODAS las rutas (assets y uploads) sean relativas para que Dompdf las lea del disco duro sin usar HTTP
+    let htmlString = node.innerHTML.replace(new RegExp(baseUrl, 'g'), '');
     cleanup();
 
     try {
