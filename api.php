@@ -525,6 +525,10 @@ elseif ($action === 'get_next_quote_no') {
         $input = json_decode(file_get_contents('php://input'), true);
         $html = $input['html'] ?? '';
         
+        // Evitar el error "Frame not found in cellmap" de Dompdf reemplazando border-collapse: collapse
+        // por separate + border-spacing: 0 (visualmente idéntico pero seguro contra caídas de página)
+        $html = preg_replace('/border-collapse\s*:\s*collapse/i', 'border-collapse: separate; border-spacing: 0;', $html);
+        
         if (!file_exists('libs/vendor/autoload.php')) {
             ob_end_clean();
             echo json_encode(["success" => false, "error" => "El directorio 'libs/vendor' no se encuentra en el servidor. Por favor, sube la carpeta 'libs' completa a DreamHost."]);
@@ -539,13 +543,16 @@ elseif ($action === 'get_next_quote_no') {
         $fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
             body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #333; }
             .print-container { width: 100%; max-width: 100%; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 20px; }
             th { background-color: #2d2d2d; color: white; padding: 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
             td { padding: 8px; vertical-align: top; border-bottom: 1px solid #e0e0e0; }
             .totals-bg { background-color: #e63946; color: white; padding: 10px; font-weight: bold; font-size: 16px; border-radius: 4px; }
             .doc-head img { height: 60px; }
-            .info-grid-mobile { width: 100%; }
-            .info-grid-mobile > div { display: inline-block; width: 48%; vertical-align: top; }
+            
+            /* Compatibilidad de Flex y Grid para Dompdf */
+            .pdf-meta { width: 100%; display: block !important; margin-bottom: 30px; }
+            .pdf-meta > div { display: inline-block !important; width: 48% !important; vertical-align: top !important; }
+            div[style*="display: flex"], div[style*="display:flex"] { display: block !important; }
         </style></head><body>' . $html . '</body></html>';
         
         $dompdf->loadHtml($fullHtml);
