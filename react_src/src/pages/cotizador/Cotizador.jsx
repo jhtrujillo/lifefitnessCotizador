@@ -385,28 +385,47 @@ export default function Cotizador() {
       .catch(err => { cleanup(); throw err; });
   };
 
-  // Usado por el envío por correo / WhatsApp: devuelve un File con el PDF.
   const generatePdfFile = async () => {
-    await loadHtml2Pdf();
-    if (!window.html2pdf) {
-      return Promise.reject(new Error("La librería html2pdf no se pudo cargar. Revisa tu conexión a internet."));
+    const { node, cleanup } = buildCleanNode();
+    // Reemplazar imágenes locales con rutas absolutas para Dompdf
+    const baseUrl = window.location.origin + window.location.pathname.replace('cotizador.html', '');
+    const htmlString = node.innerHTML.replace(/src="assets\//g, `src="${baseUrl}assets/`).replace(/src="uploads\//g, `src="${baseUrl}uploads/`);
+    cleanup();
+
+    try {
+      const response = await fetchWithAuth('generate_pdf', {
+        method: 'POST',
+        body: { html: htmlString }
+      });
+      if (response.success && response.pdf) {
+        const byteCharacters = atob(response.pdf);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        return new File([blob], `Cotizacion_${client.quoteNo || '1'}.pdf`, { type: 'application/pdf' });
+      }
+      throw new Error(response.error || "Error al generar PDF en el servidor.");
+    } catch (err) {
+      console.error(err);
+      throw new Error("No se pudo conectar con el generador de PDF.");
     }
-    return buildPdf().then(({ pdf, filename }) => {
-      const blob = pdf.output('blob');
-      return new File([blob], filename, { type: 'application/pdf' });
-    });
   };
 
-  // Botón "Descargar PDF": genera y descarga el archivo directamente (sin diálogo de impresión).
   const downloadPdf = async () => {
-    await loadHtml2Pdf();
-    if (!window.html2pdf) {
-      alert("No se pudo cargar el generador de PDF. Revisa tu conexión a internet.");
-      return;
+    try {
+      const file = await generatePdfFile();
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(err.message);
     }
-    buildPdf()
-      .then(({ pdf, filename }) => { pdf.save(filename); })
-      .catch(err => { console.error(err); alert("Ocurrió un error al generar el PDF."); });
   };
 
   const generateMessageBody = (isNativeShare = false) => {

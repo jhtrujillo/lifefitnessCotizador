@@ -484,8 +484,36 @@ elseif ($action === 'get_next_quote_no') {
     } catch (Exception $e) {
         echo json_encode(["success" => false, "error" => $e->getMessage()]);
     }
-}
-elseif ($action === 'send_email') {
+} elseif ($action === 'generate_pdf') {
+    require_auth($pdo);
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $html = $input['html'] ?? '';
+        require 'libs/vendor/autoload.php';
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', true);
+        $dompdf = new \Dompdf\Dompdf($options);
+        
+        $fullHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+            body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #333; }
+            .print-container { width: 100%; max-width: 100%; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            th { background-color: #2d2d2d; color: white; padding: 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+            td { padding: 8px; vertical-align: top; border-bottom: 1px solid #e0e0e0; }
+            .totals-bg { background-color: #e63946; color: white; padding: 10px; font-weight: bold; font-size: 16px; border-radius: 4px; }
+            .doc-head img { height: 60px; }
+            .info-grid-mobile { width: 100%; }
+            .info-grid-mobile > div { display: inline-block; width: 48%; vertical-align: top; }
+        </style></head><body>' . $html . '</body></html>';
+        
+        $dompdf->loadHtml($fullHtml);
+        $dompdf->setPaper('letter', 'portrait');
+        $dompdf->render();
+        echo json_encode(["success" => true, "pdf" => base64_encode($dompdf->output())]);
+    } catch (Exception $e) {
+        echo json_encode(["success" => false, "error" => $e->getMessage()]);
+    }
+} elseif ($action === 'send_email') {
     require_auth($pdo);
     require 'libs/PHPMailer/Exception.php';
     require 'libs/PHPMailer/PHPMailer.php';
