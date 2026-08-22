@@ -335,8 +335,13 @@ export default function Cotizador() {
     holder.style.cssText = 'position:absolute; left:0; top:0; z-index:-9999;';
     const node = document.createElement('div');
     node.className = 'print-container pdf-doc';
-    node.style.cssText = 'padding:0; margin:0; max-width:none; width:720px; background:#ffffff; text-rendering: geometricPrecision; font-kerning: none; font-variant-ligatures: none; word-spacing: 0px; letter-spacing: 0.1px;';
+    node.style.cssText = 'padding:0; margin:0; max-width:none; width:720px; background:#ffffff; text-rendering: geometricPrecision; font-kerning: none; font-variant-ligatures: none; word-spacing: 0px; letter-spacing: 0.1px; font-family: Arial, Helvetica, sans-serif !important;';
     node.innerHTML = sourceHTML;
+    
+    const styleBlock = document.createElement('style');
+    styleBlock.innerHTML = `* { font-family: Arial, Helvetica, sans-serif !important; }`;
+    node.appendChild(styleBlock);
+
     // Quitar del clon lo que dibujamos con jsPDF o que no debe ir en el cuerpo.
     node.querySelectorAll('.doc-head, .quote-footer, .pdf-running-header, .pdf-running-footer')
       .forEach(n => n.remove());
