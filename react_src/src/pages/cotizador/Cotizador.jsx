@@ -387,9 +387,7 @@ export default function Cotizador() {
 
   const generatePdfFile = async () => {
     const { node, cleanup } = buildCleanNode();
-    // Reemplazar imágenes locales con rutas absolutas para Dompdf
-    const baseUrl = window.location.origin + window.location.pathname.replace('cotizador.html', '');
-    const htmlString = node.innerHTML.replace(/src="assets\//g, `src="${baseUrl}assets/`).replace(/src="uploads\//g, `src="${baseUrl}uploads/`);
+    const htmlString = node.innerHTML;
     cleanup();
 
     try {
@@ -1069,16 +1067,24 @@ export default function Cotizador() {
             <tr><td>
 
         {/* Cabecera */}
-        <div className="doc-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', borderBottom: '3px solid #e63946', paddingBottom: '18px', marginBottom: '26px' }}>
-          <img src="assets/logo.png" alt="Fitness Life S.A.S" style={{ height: '72px', width: 'auto', maxWidth: '100%', objectFit: 'contain' }} />
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '30px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1, color: '#2d2d2d' }}>Cotización</div>
-            <div style={{ fontSize: '11px', color: '#727272', marginTop: '8px', lineHeight: '1.7' }}>
-              <div>N.º <span style={{ fontWeight: 600, color: '#333333' }}>{client.quoteNo}</span></div>
-              <div>Fecha <span style={{ color: '#333333' }}>{client.date}</span></div>
-              <div>Válida por <span style={{ color: '#333333' }}>{client.validDays}</span></div>
-            </div>
-          </div>
+        <div className="doc-head" style={{ width: '100%', borderBottom: '3px solid #e63946', paddingBottom: '18px', marginBottom: '26px' }}>
+          <table style={{ width: '100%', border: 'none', margin: 0, padding: 0 }}>
+            <tbody>
+              <tr>
+                <td style={{ verticalAlign: 'top', border: 'none', padding: 0 }}>
+                  <img src="assets/logo.png" alt="Fitness Life S.A.S" style={{ height: '72px', width: 'auto' }} />
+                </td>
+                <td style={{ verticalAlign: 'top', textAlign: 'right', border: 'none', padding: 0 }}>
+                  <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '30px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1, color: '#2d2d2d' }}>Cotización</div>
+                  <div style={{ fontSize: '11px', color: '#727272', marginTop: '8px', lineHeight: '1.7' }}>
+                    <div>N.º <span style={{ fontWeight: 600, color: '#333333' }}>{client.quoteNo}</span></div>
+                    <div>Fecha <span style={{ color: '#333333' }}>{client.date}</span></div>
+                    <div>Válida por <span style={{ color: '#333333' }}>{client.validDays}</span></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {/* Información de Contacto */}
@@ -1119,9 +1125,9 @@ export default function Cotizador() {
             <tbody>
               {items.map((row, idx) => (
                 <tr key={row.id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                  <td data-label="Imagen" className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'top' }}>
-                    <div className="row-img" style={{ width: '84px', height: '66px', border: '1px dashed #c6c6c6', background: '#f7f7f7', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '4px' }}>
-                      <img src={row.img} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                  <td data-label="Imagen" className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'top', textAlign: 'center' }}>
+                    <div className="row-img" style={{ width: '84px', height: '66px', border: '1px dashed #c6c6c6', background: '#f7f7f7', overflow: 'hidden', borderRadius: '4px', margin: '0 auto', textAlign: 'center', display: 'table-cell', verticalAlign: 'middle' }}>
+                      <img src={row.img} alt="" style={{ maxWidth: '80px', maxHeight: '60px', width: 'auto', height: 'auto' }} />
                     </div>
                   </td>
                   <td data-label="Descripción" className="desc-cell" style={{ padding: '12px 10px', verticalAlign: 'top' }}>
@@ -1139,20 +1145,22 @@ export default function Cotizador() {
 
         {/* Totales */}
         <div className="avoid-break" style={{ textAlign: 'right', marginTop: '10px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-          <div className="total-box-mobile" style={{ display: 'inline-block', textAlign: 'left', width: '320px', fontSize: '14px', maxWidth: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid #e0e0e0' }}>
-              <span style={{ color: '#727272' }}>Subtotal</span>
-              <span style={{ fontWeight: 600, color: '#333333' }}>{fmt(subtotalNum)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 16px', borderBottom: '1px solid #e0e0e0' }}>
-              <span style={{ color: '#727272' }}>IVA (19%)</span>
-              <span style={{ fontWeight: 600, color: '#333333' }}>{fmt(ivaNum)}</span>
-            </div>
-            <div className="totals-bg" style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', background: '#e63946', color: 'white', fontFamily: 'Oswald, sans-serif', fontSize: '20px', fontWeight: 600, letterSpacing: '.03em', borderRadius: '0 0 8px 8px' }}>
-              <span>TOTAL</span>
-              <span>{fmt(totalNum)}</span>
-            </div>
-          </div>
+          <table className="total-box-mobile" style={{ display: 'inline-table', textAlign: 'left', width: '320px', fontSize: '14px', maxWidth: '100%', borderCollapse: 'collapse', margin: '0 0 0 auto' }}>
+            <tbody>
+              <tr>
+                <td style={{ color: '#727272', padding: '10px 16px', borderBottom: '1px solid #e0e0e0', border: 'none' }}>Subtotal</td>
+                <td style={{ fontWeight: 600, color: '#333333', padding: '10px 16px', borderBottom: '1px solid #e0e0e0', textAlign: 'right', border: 'none' }}>{fmt(subtotalNum)}</td>
+              </tr>
+              <tr>
+                <td style={{ color: '#727272', padding: '10px 16px', borderBottom: '1px solid #e0e0e0', border: 'none' }}>IVA (19%)</td>
+                <td style={{ fontWeight: 600, color: '#333333', padding: '10px 16px', borderBottom: '1px solid #e0e0e0', textAlign: 'right', border: 'none' }}>{fmt(ivaNum)}</td>
+              </tr>
+              <tr>
+                <td style={{ background: '#e63946', color: 'white', fontFamily: 'Oswald, sans-serif', fontSize: '20px', fontWeight: 600, letterSpacing: '.03em', padding: '16px', borderRadius: '0 0 0 8px', border: 'none' }}>TOTAL</td>
+                <td style={{ background: '#e63946', color: 'white', fontFamily: 'Oswald, sans-serif', fontSize: '20px', fontWeight: 600, letterSpacing: '.03em', padding: '16px', textAlign: 'right', borderRadius: '0 0 8px 0', border: 'none' }}>{fmt(totalNum)}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {/* Condiciones comerciales */}
