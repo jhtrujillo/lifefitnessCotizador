@@ -412,6 +412,8 @@ export default function Cotizador() {
     
     buildPdf()
       .then(({ pdf }) => {
+        // Incrustar el comando de auto-impresión en el PDF
+        pdf.autoPrint();
         const blobUrl = pdf.output('bloburl');
         if (newWindow) {
           newWindow.location.href = blobUrl;
