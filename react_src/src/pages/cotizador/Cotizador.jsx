@@ -364,7 +364,7 @@ export default function Cotizador() {
       margin:      [1.05, 0.4, 0.7, 0.4],
       filename:    `Cotizacion_${client.quoteNo || '1'}.pdf`,
       image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 720, letterRendering: true },
+      html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 720 },
       jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' },
       pagebreak:   { mode: ['css', 'legacy'] }
     };
