@@ -193,13 +193,13 @@ elseif ($action === 'logout') {
 }
 elseif ($action === 'get_users') {
     $user = require_auth($pdo);
-    // TEMPORAL: Permitir a todos ver usuarios para recuperación
+    if ($user['rol'] !== 'admin') { echo json_encode(["success"=>false,"error"=>"No autorizado"]); exit; }
     $stmt = $pdo->query("SELECT id, username, nombre, rol, created_at FROM usuarios ORDER BY nombre ASC");
     echo json_encode(["success" => true, "users" => $stmt->fetchAll()]);
 }
 elseif ($action === 'create_user') {
     $user = require_auth($pdo);
-    // TEMPORAL: Permitir a todos crear usuarios para recuperación
+    if ($user['rol'] !== 'admin') { echo json_encode(["success"=>false,"error"=>"No autorizado"]); exit; }
     $input = json_decode(file_get_contents('php://input'), true);
     if (!isset($input['username']) || !isset($input['password'])) {
         echo json_encode(["success" => false, "error" => "Datos incompletos."]);
@@ -217,7 +217,7 @@ elseif ($action === 'create_user') {
 }
 elseif ($action === 'update_user') {
     $user = require_auth($pdo);
-    // TEMPORAL: Permitir a todos actualizar usuarios para recuperación
+    if ($user['rol'] !== 'admin') { echo json_encode(["success"=>false,"error"=>"No autorizado"]); exit; }
     $input = json_decode(file_get_contents('php://input'), true);
     try {
         if (!empty($input['password'])) {
@@ -235,6 +235,7 @@ elseif ($action === 'update_user') {
 }
 elseif ($action === 'delete_user') {
     $user = require_auth($pdo);
+    if ($user['rol'] !== 'admin') { echo json_encode(["success"=>false,"error"=>"No autorizado"]); exit; }
     $input = json_decode(file_get_contents('php://input'), true);
     try {
         if ($input['id'] == 1) throw new Exception("No puedes eliminar al administrador principal.");
