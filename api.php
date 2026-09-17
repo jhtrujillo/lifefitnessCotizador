@@ -19,7 +19,7 @@ $entorno = ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_NAME'] =
 if ($entorno === "LOCAL") {
     $host = "127.0.0.1";
     $port = "8889";
-    $dbname = "fitness_life";
+    $dbname = "cotizacioneslifefitness";
     $username = "root";
     $password = "root";
 } else {

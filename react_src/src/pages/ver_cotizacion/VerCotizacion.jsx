@@ -186,7 +186,7 @@ export default function VerCotizacion() {
                   <td style={{ padding: '12px 10px', verticalAlign: 'top' }}>
                     <div className="row-img" style={{ width: '84px', height: '66px', border: '1px dashed #c6c6c6', background: '#f7f7f7', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '4px' }}>
                       {row.img ? (
-                        <img src={row.img} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                        <img src={row.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       ) : (
                         <span style={{ fontSize: '10px', color: '#ccc' }}>No img</span>
                       )}
