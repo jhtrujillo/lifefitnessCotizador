@@ -305,6 +305,9 @@ elseif ($action === 'get_products') {
         $productos = $stmt->fetchAll();
         foreach($productos as &$p) {
             $p['media_json'] = (array_key_exists('media_json', $p) && !empty($p['media_json'])) ? json_decode($p['media_json'], true) : [];
+            if (empty($p['img']) && is_array($p['media_json']) && count($p['media_json']) > 0 && isset($p['media_json'][0]['url'])) {
+                $p['img'] = $p['media_json'][0]['url'];
+            }
         }
         echo json_encode(["success" => true, "productos" => $productos]);
     } catch (Exception $e) {
