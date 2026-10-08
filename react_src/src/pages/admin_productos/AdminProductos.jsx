@@ -86,7 +86,8 @@ export default function AdminProductos() {
       gw: '',
       volume: '',
       img: '',
-      media_json: []
+      media_json: [],
+      categoria_id: ''
     });
     setUploadError('');
     setIsModalOpen(true);
@@ -505,10 +506,22 @@ export default function AdminProductos() {
                   <label>Código (Item N.º)</label>
                   <input value={form.item_no} onChange={(e) => handleFormChange('item_no', e.target.value)} placeholder="Ej: M7Pro-1001" />
                 </div>
+                
                 <div className="form-group">
-                  <label>Serie</label>
-                  <input value={form.series} onChange={(e) => handleFormChange('series', e.target.value)} placeholder="Ej: M7Pro, GL, Cardio..." />
+                  <label>Categoría</label>
+                  <select value={form.categoria_id || ''} onChange={(e) => handleFormChange('categoria_id', e.target.value)}>
+                    <option value="">-- Seleccionar Categoría --</option>
+                    {categorias.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
                 </div>
+                <div className="form-group">
+                  <label>Marca / Serie</label>
+                  <select value={form.series || ''} onChange={(e) => handleFormChange('series', e.target.value)}>
+                    <option value="">-- Seleccionar Marca --</option>
+                    {marcas.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+                  </select>
+                </div>
+
 
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                   <label>Precio Base Referencia (COP)</label>

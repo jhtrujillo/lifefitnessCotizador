@@ -298,6 +298,24 @@ elseif ($action === 'create_client') {
         echo json_encode(["success" => false, "error" => $e->getMessage()]);
     }
 }
+elseif ($action === 'get_categorias') {
+    require_auth($pdo);
+    try {
+        $stmt = $pdo->query("SELECT * FROM categorias ORDER BY pos ASC");
+        echo json_encode(['success' => true, 'categorias' => $stmt->fetchAll()]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+}
+elseif ($action === 'get_marcas') {
+    require_auth($pdo);
+    try {
+        $stmt = $pdo->query("SELECT * FROM marcas ORDER BY name ASC");
+        echo json_encode(['success' => true, 'marcas' => $stmt->fetchAll()]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+}
 elseif ($action === 'get_products') {
     require_auth($pdo);
     try {
@@ -318,11 +336,11 @@ elseif ($action === 'create_product') {
     $user = require_auth($pdo);
     try {
         $input = json_decode(file_get_contents('php://input'), true);
-        $stmt = $pdo->prepare("INSERT INTO productos (series, item_no, name, price, set_up_dimension, nw, gw, volume, img, media_json, pos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO productos (series, item_no, name, price, set_up_dimension, nw, gw, volume, img, media_json, pos, categoria_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $input['series'] ?? '', $input['item_no'] ?? '', $input['name'] ?? '', $input['price'] ?? 0,
             $input['set_up_dimension'] ?? '', $input['nw'] ?? '', $input['gw'] ?? '', $input['volume'] ?? '',
-            $input['img'] ?? '', isset($input['media_json']) ? json_encode($input['media_json']) : '[]', $input['pos'] ?? 0
+            $input['img'] ?? '', isset($input['media_json']) ? json_encode($input['media_json']) : '[]', $input['pos'] ?? 0, $input['categoria_id'] ?? null
         ]);
         echo json_encode(["success" => true, "id" => $pdo->lastInsertId()]);
     } catch (Exception $e) {
@@ -334,12 +352,12 @@ elseif ($action === 'update_product') {
     try {
         $input = json_decode(file_get_contents('php://input'), true);
         if (empty($input['id'])) throw new Exception("ID requerido");
-        $stmt = $pdo->prepare("UPDATE productos SET series=?, item_no=?, name=?, price=?, set_up_dimension=?, nw=?, gw=?, volume=?, img=?, media_json=?, pos=? WHERE id=?");
+        $stmt = $pdo->prepare("UPDATE productos SET series=?, item_no=?, name=?, price=?, set_up_dimension=?, nw=?, gw=?, volume=?, img=?, media_json=?, pos=?, categoria_id=? WHERE id=?");
         $stmt->execute([
             $input['series'] ?? '', $input['item_no'] ?? '', $input['name'] ?? '', $input['price'] ?? 0,
             $input['set_up_dimension'] ?? '', $input['nw'] ?? '', $input['gw'] ?? '', $input['volume'] ?? '',
             $input['img'] ?? '', isset($input['media_json']) ? json_encode($input['media_json']) : '[]',
-            $input['pos'] ?? 0, $input['id']
+            $input['pos'] ?? 0, $input['categoria_id'] ?? null, $input['id']
         ]);
         echo json_encode(["success" => true]);
     } catch (Exception $e) {
