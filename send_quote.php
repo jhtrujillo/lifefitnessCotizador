@@ -108,8 +108,8 @@ function sendSMTP($to, $subject, $body) {
         $mail->SMTPAuth   = true;
         $mail->Username   = 'viviocampo@advantascience.com';
         $mail->Password   = 'PON_TU_CONTRASEÑA_AQUI'; // <-- IMPORTANTE: PON AQUÍ TU CONTRASEÑA
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = 465;
         
         $mail->CharSet    = 'UTF-8';
 
@@ -127,6 +127,7 @@ function sendSMTP($to, $subject, $body) {
         return true;
     } catch (Exception $e) {
         error_log("SMTP Error: {$mail->ErrorInfo}");
+        file_put_contents('mail_error.log', date('Y-m-d H:i:s') . " SMTP Error: " . $mail->ErrorInfo . "\n", FILE_APPEND);
         return false;
     }
 }
