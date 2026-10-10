@@ -90,9 +90,16 @@ $items_html
 <p>Gracias por confiar en Fitness Life.</p>
 ";
 
-// If we are in local MAMP, mail() might not work, so we just suppress errors and rely on DB.
-@mail($to_comercial, $subject_comercial, $body_comercial, $headers);
-@mail($to_cliente, $subject_cliente, $body_cliente, $headers);
+// Added the -f flag which is often required by hosting providers (like Dreamhost, HostGator) to authorize the sender
+$returnpath = "-f cotizaciones@fitnesslife.com.co";
+
+$mail1 = @mail($to_comercial, $subject_comercial, $body_comercial, $headers, $returnpath);
+$mail2 = @mail($to_cliente, $subject_cliente, $body_cliente, $headers, $returnpath);
+
+if(!$mail1 || !$mail2) {
+    // Just for debugging, though we still return success to the frontend
+    error_log("Failed to send email via mail() function in PHP");
+}
 
 echo json_encode(["success" => true, "msg" => "Cotización procesada"]);
 ?>
