@@ -46,9 +46,9 @@ $to_cliente = $email;
 $subject_comercial = "Nueva Solicitud de Cotización de $nombre";
 $subject_cliente = "Tu cotización con Fitness Life está en proceso";
 
-$headers  = "MIME-Version: 1.0\r\n";
-$headers .= "Content-type: text/html; charset=utf-8\r\n";
-$headers .= "From: Fitness Life <cotizaciones@fitnesslife.com.co>\r\n";
+
+
+
 
 $items_html = "<table style='width:100%; border-collapse: collapse; margin-top: 20px;'>
     <thead>
@@ -90,16 +90,51 @@ $items_html
 <p>Gracias por confiar en Fitness Life.</p>
 ";
 
-// Added the -f flag which is often required by hosting providers (like Dreamhost, HostGator) to authorize the sender
-$returnpath = "-f cotizaciones@fitnesslife.com.co";
+// --- PHPMAILER SMTP CONFIGURATION ---
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
 
-$mail1 = @mail($to_comercial, $subject_comercial, $body_comercial, $headers, $returnpath);
-$mail2 = @mail($to_cliente, $subject_cliente, $body_cliente, $headers, $returnpath);
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-if(!$mail1 || !$mail2) {
-    // Just for debugging, though we still return success to the frontend
-    error_log("Failed to send email via mail() function in PHP");
+// Helper function to send via SMTP
+function sendSMTP($to, $subject, $body) {
+    $mail = new PHPMailer(true);
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.dreamhost.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'viviocampo@advantascience.com';
+        $mail->Password   = 'PON_TU_CONTRASEÑA_AQUI'; // <-- IMPORTANTE: PON AQUÍ TU CONTRASEÑA
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+        
+        $mail->CharSet    = 'UTF-8';
+
+        // Recipients
+        $mail->setFrom('viviocampo@advantascience.com', 'Fitness Life');
+        $mail->addAddress($to);
+        $mail->addReplyTo('ventas@fitnesslife.com.co', 'Ventas Fitness Life');
+
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
+
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("SMTP Error: {$mail->ErrorInfo}");
+        return false;
+    }
 }
+
+// Send both emails using SMTP
+sendSMTP($to_comercial, $subject_comercial, $body_comercial);
+sendSMTP($to_cliente, $subject_cliente, $body_cliente);
+
 
 echo json_encode(["success" => true, "msg" => "Cotización procesada"]);
 ?>
