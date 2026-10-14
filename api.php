@@ -159,6 +159,13 @@ if ($action === 'login') {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
+        // Verificar si tiene permiso para el módulo del cotizador
+        $acceso_cotizador = isset($user['acceso_cotizador']) ? (int)$user['acceso_cotizador'] : 1;
+        if ($acceso_cotizador === 0) {
+            echo json_encode(["success" => false, "error" => "Tu usuario no tiene permisos para acceder al módulo del cotizador."]);
+            exit;
+        }
+
         // Self-heal: Si el usuario es 'admin' pero su rol se corrompió, forzar a 'admin'
         if (strtolower($user['username']) === 'admin' && $user['rol'] !== 'admin') {
             $pdo->prepare("UPDATE usuarios SET rol = 'admin' WHERE id = ?")->execute([$user['id']]);
@@ -179,7 +186,9 @@ if ($action === 'login') {
                 "id" => $user['id'],
                 "username" => $user['username'],
                 "nombre" => $user['nombre'],
-                "rol" => $user['rol']
+                "rol" => $user['rol'],
+                "acceso_web" => (int)($user['acceso_web'] ?? 1),
+                "acceso_cotizador" => $acceso_cotizador
             ]
         ]);
     } else {
