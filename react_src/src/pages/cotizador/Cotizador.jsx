@@ -792,7 +792,23 @@ export default function Cotizador() {
                 <div style={{ fontSize: 40 + 'px', marginBottom: 16 + 'px', color: '#4ad66d' }}>✓</div>
                 <h3 style={{ fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', margin: '0 0 8px' }}>¡Guardado Exitoso!</h3>
                 <p style={{ margin: '0 0 24px', fontSize: 14 + 'px' }}>{saveModalMessage}</p>
-                <button onClick={() => setSaveModalState('none')} style={{ background: 'white', color: '#1d3557', border: 'none', padding: '10px 24px', borderRadius: 4 + 'px', fontWeight: 600, cursor: 'pointer', fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase' }}>Listo</button>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                  <button 
+                    onClick={() => {
+                      setSaveModalState('none');
+                      startNewQuote();
+                    }} 
+                    style={{ background: '#e63946', color: 'white', border: 'none', padding: '10px 24px', borderRadius: 4 + 'px', fontWeight: 600, cursor: 'pointer', fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase' }}
+                  >
+                    + Nueva Cotización
+                  </button>
+                  <a 
+                    href="mis_cotizaciones.html" 
+                    style={{ background: 'white', color: '#1d3557', textDecoration: 'none', border: 'none', padding: '10px 20px', borderRadius: 4 + 'px', fontWeight: 600, cursor: 'pointer', fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center' }}
+                  >
+                    Ver en Historial
+                  </a>
+                </div>
               </div>
             )}
 
