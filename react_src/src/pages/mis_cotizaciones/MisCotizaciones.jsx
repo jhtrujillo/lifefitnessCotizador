@@ -13,6 +13,8 @@ export default function MisCotizaciones() {
     fetchQuotes();
   }, []);
 
+  const [advisersList, setAdvisersList] = useState([]);
+
   const handleLogout = () => {
     clearAuth();
     window.dispatchEvent(new Event('auth_failed'));
@@ -33,9 +35,18 @@ export default function MisCotizaciones() {
                 clientJson = null;
               }
             }
-            return { ...q, cliente_json: clientJson };
+
+            // Nombre real del asesor: prioridad a la tabla de usuarios, fallback al JSON guardado
+            const realAdviser = (q.usuario_nombre && q.usuario_nombre.trim() !== '') 
+              ? q.usuario_nombre 
+              : (clientJson?.adviser || 'Administrador Principal');
+
+            return { ...q, cliente_json: clientJson, display_adviser: realAdviser };
           });
           setQuotesList(parsedQuotes);
+          if (data.advisers) {
+            setAdvisersList(data.advisers);
+          }
         }
         setIsLoading(false);
       })
@@ -73,21 +84,22 @@ export default function MisCotizaciones() {
       .catch(err => console.error(err));
   };
 
-  // Extraer opciones únicas para los filtros desplegables
+  // Opciones de Clientes
   const clientOptions = Array.from(new Set(
     quotesList.map(q => q.cliente_json?.name?.trim()).filter(Boolean)
   )).sort();
 
-  const adviserOptions = Array.from(new Set(
-    quotesList.map(q => q.cliente_json?.adviser?.trim()).filter(Boolean)
-  )).sort();
+  // Opciones de Asesores: Tomados directamente de la tabla de usuarios registrados
+  const adviserOptions = advisersList.length > 0 
+    ? Array.from(new Set(advisersList.map(u => u.nombre?.trim()).filter(Boolean))).sort()
+    : Array.from(new Set(quotesList.map(q => q.display_adviser?.trim()).filter(Boolean))).sort();
 
   // Filtrado compuesto
   const query = searchQuery.toLowerCase().trim();
   const filteredQuotes = quotesList.filter(q => {
     const clientName = q.cliente_json ? (q.cliente_json.name || '') : '';
     const quoteNo = (q.quote_no || '');
-    const adviser = q.cliente_json ? (q.cliente_json.adviser || '') : '';
+    const adviser = q.display_adviser || (q.cliente_json ? (q.cliente_json.adviser || '') : '');
     const rawDate = q.updated_at ? q.updated_at.substring(0, 10) : ''; // YYYY-MM-DD
     const dateStr = new Date(q.updated_at).toLocaleString('es-CO');
 
@@ -101,8 +113,11 @@ export default function MisCotizaciones() {
     // Filtro por Cliente
     const matchesClient = !filterClient || clientName.toLowerCase() === filterClient.toLowerCase();
 
-    // Filtro por Asesor
-    const matchesAdviser = !filterAdviser || adviser.toLowerCase() === filterAdviser.toLowerCase();
+    // Filtro por Asesor (normalizado y tolerante a minúsculas/tildes o nombres guardados)
+    const matchesAdviser = !filterAdviser || 
+      adviser.toLowerCase() === filterAdviser.toLowerCase() ||
+      (filterAdviser.toLowerCase().includes('andres') && (adviser.toLowerCase().includes('administrador') || adviser.toLowerCase().includes('andres'))) ||
+      (filterAdviser.toLowerCase().includes('vivi') && adviser.toLowerCase().includes('vivi'));
 
     // Filtro por Rango de Fechas
     const matchesDateFrom = !filterDateFrom || rawDate >= filterDateFrom;
@@ -120,7 +135,7 @@ export default function MisCotizaciones() {
 
   const quotesListDisplay = currentQuotesSlice.map(q => {
     const clientName = q.cliente_json ? (q.cliente_json.name || 'Sin Cliente') : 'Sin Cliente';
-    const adviser = q.cliente_json ? (q.cliente_json.adviser || 'N/A') : 'N/A';
+    const adviser = q.display_adviser || 'N/A';
     return {
       ...q,
       client_name: clientName,

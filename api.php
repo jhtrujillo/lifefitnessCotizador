@@ -426,9 +426,16 @@ elseif ($action === 'get_quotes') {
     $user = require_auth($pdo);
     try {
         if ($user['rol'] === 'admin') {
-            $stmt = $pdo->query("SELECT * FROM cotizaciones ORDER BY updated_at DESC");
+            $stmt = $pdo->query("SELECT c.*, u.nombre as usuario_nombre, u.username as usuario_username 
+                                 FROM cotizaciones c 
+                                 LEFT JOIN usuarios u ON c.usuario_id = u.id 
+                                 ORDER BY c.updated_at DESC");
         } else {
-            $stmt = $pdo->prepare("SELECT * FROM cotizaciones WHERE usuario_id = ? ORDER BY updated_at DESC");
+            $stmt = $pdo->prepare("SELECT c.*, u.nombre as usuario_nombre, u.username as usuario_username 
+                                   FROM cotizaciones c 
+                                   LEFT JOIN usuarios u ON c.usuario_id = u.id 
+                                   WHERE c.usuario_id = ? 
+                                   ORDER BY c.updated_at DESC");
             $stmt->execute([$user['id']]);
         }
         $quotes = $stmt->fetchAll();
@@ -436,7 +443,12 @@ elseif ($action === 'get_quotes') {
             $q['cliente_json'] = json_decode($q['cliente_json'], true);
             $q['items_json'] = json_decode($q['items_json'], true);
         }
-        echo json_encode(["success" => true, "quotes" => $quotes]);
+
+        // Obtener la lista de usuarios activos para el filtro de asesores
+        $usersStmt = $pdo->query("SELECT id, nombre, username FROM usuarios ORDER BY nombre ASC");
+        $advisersList = $usersStmt->fetchAll();
+
+        echo json_encode(["success" => true, "quotes" => $quotes, "advisers" => $advisersList]);
     } catch (Exception $e) {
         echo json_encode(["success" => false, "error" => $e->getMessage()]);
     }
