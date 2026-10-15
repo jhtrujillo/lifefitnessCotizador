@@ -49,8 +49,10 @@ export default function Cotizador() {
   // Cart
   const [items, setItems] = useState([]);
 
-  // Selected Series Filter
-  const [selectedSeries, setSelectedSeries] = useState('');
+  // Selected Filters
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [selectedSerie, setSelectedSerie] = useState('');
 
   // Custom Item Form
   const [customName, setCustomName] = useState('');
@@ -141,16 +143,25 @@ export default function Cotizador() {
     fetchWithAuth('get_products')
       .then(data => {
         if (data.success) {
-          const mapped = data.productos.map(p => ({
-            id: p.id,
-            name: `${p.item_no} - ${p.name}`,
-            brand: 'Realleader',
-            series: p.series,
-            desc: `Series: ${p.series} | Set-Up: ${p.set_up_dimension || 'N/A'} | N.W: ${p.nw || 'N/A'}`,
-            price: parseFloat(p.price) || 0,
-            img: p.img || '',
-            categoryName: p.series
-          }));
+          const mapped = data.productos.map(p => {
+            const marca = (p.series && p.series.trim()) || 'Fitness Life';
+            const serie = (p.serie && p.serie.trim()) || '';
+            const categoria = (p.categoria_nombre && p.categoria_nombre.trim()) || '';
+
+            return {
+              id: p.id,
+              name: `${p.item_no} - ${p.name}`,
+              item_no: p.item_no,
+              rawName: p.name,
+              brand: marca,
+              series: marca, // compatibilidad
+              serie: serie,
+              categoryName: categoria,
+              desc: `${marca}${serie ? ' · Serie ' + serie : ''}${categoria ? ' · ' + categoria : ''} | Set-Up: ${p.set_up_dimension || 'N/A'} | N.W: ${p.nw || 'N/A'}`,
+              price: parseFloat(p.price) || 0,
+              img: p.img || ''
+            };
+          });
           setProductsList(mapped);
         }
         setIsLoadingProducts(false);
@@ -723,13 +734,31 @@ export default function Cotizador() {
   const ivaNum = subtotalNum * 0.19;
   const totalNum = subtotalNum + ivaNum;
 
-  // Filtered Products
-  const seriesOptions = Array.from(new Set(productsList.map(p => p.series).filter(Boolean)));
+  // Filter Options
+  const categoryOptions = Array.from(new Set(productsList.map(p => p.categoryName).filter(Boolean))).sort();
+  const brandOptions = Array.from(new Set(productsList.map(p => p.brand).filter(Boolean))).sort();
+  
+  // Series disponibles según categoría o marca seleccionada
+  const serieOptions = Array.from(new Set(
+    productsList
+      .filter(p => (!selectedCategory || p.categoryName === selectedCategory) && (!selectedBrand || p.brand === selectedBrand))
+      .map(p => p.serie)
+      .filter(Boolean)
+  )).sort();
+
   const pQuery = productSearchQuery.toLowerCase().trim();
   const filteredProducts = productsList.filter(p => {
-    const matchesQuery = pQuery.length === 0 || (p.name || "").toString().toLowerCase().includes(pQuery) || (p.series && p.series.toLowerCase().includes(pQuery));
-    const matchesSeries = !selectedSeries || p.series === selectedSeries;
-    return matchesQuery && matchesSeries;
+    const matchesQuery = pQuery.length === 0 || 
+      (p.name || "").toString().toLowerCase().includes(pQuery) || 
+      (p.brand && p.brand.toLowerCase().includes(pQuery)) ||
+      (p.serie && p.serie.toLowerCase().includes(pQuery)) ||
+      (p.categoryName && p.categoryName.toLowerCase().includes(pQuery));
+
+    const matchesCategory = !selectedCategory || p.categoryName === selectedCategory;
+    const matchesBrand = !selectedBrand || p.brand === selectedBrand;
+    const matchesSerie = !selectedSerie || p.serie === selectedSerie;
+
+    return matchesQuery && matchesCategory && matchesBrand && matchesSerie;
   });
 
   // Filtered Clients
@@ -871,35 +900,96 @@ export default function Cotizador() {
             {/* Buscador de Equipos */}
             <div className="panel-card" style={{ marginBottom: '24px', position: 'relative' }}>
               <h3 style={{ margin: '0 0 16px', fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', color: '#1d3557', fontSize: '16px' }}>🔍 Buscar y Añadir Equipos del Catálogo</h3>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', flexGrow: 1, minWidth: '240px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', background: '#f7f7f7', border: '1px solid #d8d8d8', borderRight: 'none', borderRadius: '6px 0 0 6px', fontSize: '18px', color: '#999999' }}>🔍</span>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexGrow: 2, minWidth: '220px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', background: '#f7f7f7', border: '1px solid #d8d8d8', borderRight: 'none', borderRadius: '6px 0 0 6px', fontSize: '16px', color: '#999999' }}>🔍</span>
                   <input 
                     value={productSearchQuery} 
-                    onChange={(e) => setProductSearchQuery(e.target.value)} 
+                    onChange={(e) => {
+                      setProductSearchQuery(e.target.value);
+                      setShowProductSuggestions(true);
+                    }} 
                     onFocus={() => setShowProductSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowProductSuggestions(false), 200)}
-                    placeholder="Buscar equipo por nombre o marca..." 
-                    style={{ width: '100%', boxSizing: 'border-box', background: 'white', border: '1px solid #d8d8d8', borderLeft: 'none', borderRadius: '0 6px 6px 0', padding: '10px 10px 10px 0', fontSize: '13px', fontWeight: 600, color: '#333333', cursor: 'text' }}
+                    placeholder="Buscar por nombre, código SKU o descripción..." 
+                    style={{ width: '100%', boxSizing: 'border-box', background: 'white', border: '1px solid #d8d8d8', borderLeft: 'none', borderRadius: '0 6px 6px 0', padding: '10px 12px 10px 0', fontSize: '13px', fontWeight: 600, color: '#333333', cursor: 'text' }}
                   />
                 </div>
+
+                {/* Filtro: Categoría */}
                 <select
-                  value={selectedSeries}
+                  value={selectedCategory}
                   onChange={(e) => {
-                    setSelectedSeries(e.target.value);
+                    setSelectedCategory(e.target.value);
                     setShowProductSuggestions(true);
                   }}
-                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 16px', fontSize: '13px', fontWeight: 600, color: '#333333', cursor: 'pointer', height: '41px', minWidth: '160px' }}
+                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flexGrow: 1, minWidth: '150px' }}
                 >
-                  <option value="">Todas las series</option>
-                  {seriesOptions.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
+                  <option value="">📁 Todas las categorías</option>
+                  {categoryOptions.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
+
+                {/* Filtro: Marca */}
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => {
+                    setSelectedBrand(e.target.value);
+                    setShowProductSuggestions(true);
+                  }}
+                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flexGrow: 1, minWidth: '130px' }}
+                >
+                  <option value="">🏷️ Todas las marcas</option>
+                  {brandOptions.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+
+                {/* Filtro: Serie */}
+                <select
+                  value={selectedSerie}
+                  onChange={(e) => {
+                    setSelectedSerie(e.target.value);
+                    setShowProductSuggestions(true);
+                  }}
+                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flexGrow: 1, minWidth: '120px' }}
+                >
+                  <option value="">⚡ Todas las series</option>
+                  {serieOptions.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+
+                {(selectedCategory || selectedBrand || selectedSerie || productSearchQuery) && (
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('');
+                      setSelectedBrand('');
+                      setSelectedSerie('');
+                      setProductSearchQuery('');
+                    }}
+                    style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', borderRadius: '6px', padding: '10px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', height: '41px', whiteSpace: 'nowrap' }}
+                    title="Restablecer filtros"
+                  >
+                    ✕ Limpiar
+                  </button>
+                )}
               </div>
               
               {showProductSuggestions && (
-                <div style={{ position: 'absolute', top: '100%', left: 24 + 'px', right: 24 + 'px', marginTop: '8px', background: 'white', border: '1px solid #d8d8d8', borderRadius: '6px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 999, maxHeight: '350px', overflowY: 'auto' }}>
+                <div style={{ position: 'absolute', top: '100%', left: 24 + 'px', right: 24 + 'px', marginTop: '8px', background: 'white', border: '1px solid #d8d8d8', borderRadius: '8px', boxShadow: '0 12px 30px rgba(0,0,0,0.15)', zIndex: 999, maxHeight: '380px', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 2 }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b' }}>
+                      Resultados encontrados ({filteredProducts.length})
+                    </span>
+                    <button 
+                      onClick={() => setShowProductSuggestions(false)}
+                      style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '16px', cursor: 'pointer', padding: '2px 6px' }}
+                      title="Cerrar lista"
+                    >
+                      ✕
+                    </button>
+                  </div>
                   {isLoadingProducts ? (
                     <div style={{ padding: '20px', textAlign: 'center', color: '#666', fontSize: '13px' }}>
                       <span className="loading-spinner" style={{ display: 'inline-block', width: '16px', height: '16px', border: '2px solid #ccc', borderTopColor: '#e63946', borderRadius: '50%', animation: 'spin 1s linear infinite', marginRight: '8px', verticalAlign: 'middle' }}></span>
@@ -923,8 +1013,10 @@ export default function Cotizador() {
                           <div style={{ fontWeight: 700, color: '#e63946', fontSize: '13px' }}>{fmt(p.price)}</div>
                         </div>
                       ))}
-                      {pQuery.length > 0 && filteredProducts.length === 0 && (
-                        <div style={{ padding: '20px', textAlign: 'center', color: '#999', fontSize: '13px' }}>No se encontraron productos con esa búsqueda.</div>
+                      {filteredProducts.length === 0 && (
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#999', fontSize: '13px' }}>
+                          No se encontraron productos con los filtros seleccionados.
+                        </div>
                       )}
                     </>
                   )}

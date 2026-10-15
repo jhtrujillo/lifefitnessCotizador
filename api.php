@@ -328,7 +328,10 @@ elseif ($action === 'get_marcas') {
 elseif ($action === 'get_products') {
     require_auth($pdo);
     try {
-        $stmt = $pdo->query("SELECT * FROM productos ORDER BY series, pos");
+        $stmt = $pdo->query("SELECT p.*, c.name as categoria_nombre 
+                             FROM productos p 
+                             LEFT JOIN categorias c ON p.categoria_id = c.id 
+                             ORDER BY p.series, p.pos");
         $productos = $stmt->fetchAll();
         foreach($productos as &$p) {
             $p['media_json'] = (array_key_exists('media_json', $p) && !empty($p['media_json'])) ? json_decode($p['media_json'], true) : [];
