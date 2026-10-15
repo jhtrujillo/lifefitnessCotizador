@@ -121,7 +121,7 @@ function get_current_user_obj($pdo) {
         exit;
     }
 
-    $stmt = $pdo->prepare("SELECT id, username, rol, nombre FROM usuarios WHERE token = ?");
+    $stmt = $pdo->prepare("SELECT id, username, rol, nombre, acceso_web, acceso_cotizador, rol_web, rol_cotizador FROM usuarios WHERE token = ?");
     $stmt->execute([$token]);
     return $stmt->fetch();
 }
@@ -186,7 +186,9 @@ if ($action === 'login') {
                 "id" => $user['id'],
                 "username" => $user['username'],
                 "nombre" => $user['nombre'],
-                "rol" => $user['rol'],
+                "rol" => ($user['rol_cotizador'] ?? ($user['rol'] === 'admin' ? 'admin' : 'comercial')),
+                "rol_web" => $user['rol_web'] ?? 'none',
+                "rol_cotizador" => $user['rol_cotizador'] ?? 'comercial',
                 "acceso_web" => (int)($user['acceso_web'] ?? 1),
                 "acceso_cotizador" => $acceso_cotizador
             ]
@@ -425,7 +427,8 @@ elseif ($action === 'upload_product_image') {
 elseif ($action === 'get_quotes') {
     $user = require_auth($pdo);
     try {
-        if ($user['rol'] === 'admin') {
+        $isAdminCotizador = (($user['rol_cotizador'] ?? '') === 'admin') || ($user['rol'] === 'admin');
+        if ($isAdminCotizador) {
             $stmt = $pdo->query("SELECT c.*, u.nombre as usuario_nombre, u.username as usuario_username 
                                  FROM cotizaciones c 
                                  LEFT JOIN usuarios u ON c.usuario_id = u.id 
