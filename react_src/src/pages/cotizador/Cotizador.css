@@ -72,55 +72,64 @@ input, textarea, select {
     min-width: 0; /* Previene que el grid se ensanche por la tabla */
   }
   
-  @media (max-width: 1024px) {
-    .screen-layout {
-      grid-template-columns: 1fr;
+    @media (max-width: 900px) {
+      .screen-layout {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 20px;
+      }
     }
-  }
 
-  @media (max-width: 768px) {
-    .screen-layout {
-      padding: 12px;
-      gap: 16px;
-    }
-    .panel-card {
-      padding: 16px;
-    }
-    .custom-item-grid {
-      grid-template-columns: 1fr;
-      align-items: stretch;
-    }
-    .custom-item-grid button {
-      padding: 12px;
-      font-size: 14px;
-    }
-    .app-header {
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      gap: 16px;
-      padding: 16px;
-    }
+    @media (max-width: 768px) {
+      .screen-layout {
+        padding: 10px;
+        gap: 16px;
+      }
+      .panel-card {
+        padding: 14px;
+        border-radius: 10px;
+      }
+      .custom-item-grid {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+      .custom-item-grid button {
+        padding: 12px;
+        font-size: 14px;
+      }
+      .app-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px;
+        padding: 14px 16px;
+      }
+      .app-header > div:first-child {
+        justify-content: center;
+      }
       .header-actions {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 8px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 8px;
+      }
+      .header-actions a, .header-actions button {
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column !important;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px 4px !important;
+        gap: 3px !important;
+        font-size: 11px !important;
+      }
+      .product-suggestions-dropdown {
+        left: 8px !important;
+        right: 8px !important;
+        max-height: 320px !important;
+      }
+    }
   }
-  .header-actions a, .header-actions button {
-    flex: 1;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column !important;
-    min-width: calc(50% - 8px);
-    box-sizing: border-box;
-    padding: 10px 4px !important;
-    gap: 4px !important;
-    font-size: 11px !important;
-  }
-  }
-}
 
 .print-container {
   max-width: 800px;

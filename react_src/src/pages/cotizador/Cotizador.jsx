@@ -1011,7 +1011,7 @@ export default function Cotizador() {
               </div>
               
               {showProductSuggestions && (
-                <div style={{ position: 'absolute', top: '100%', left: 24 + 'px', right: 24 + 'px', marginTop: '8px', background: 'white', border: '1px solid #d8d8d8', borderRadius: '8px', boxShadow: '0 12px 30px rgba(0,0,0,0.15)', zIndex: 999, maxHeight: '380px', overflowY: 'auto' }}>
+                <div className="product-suggestions-dropdown" style={{ position: 'absolute', top: '100%', left: '16px', right: '16px', marginTop: '8px', background: 'white', border: '1px solid #d8d8d8', borderRadius: '8px', boxShadow: '0 12px 30px rgba(0,0,0,0.15)', zIndex: 999, maxHeight: '380px', overflowY: 'auto' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 2 }}>
                     <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b' }}>
                       Resultados encontrados ({filteredProducts.length})
