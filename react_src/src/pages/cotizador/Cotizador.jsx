@@ -81,8 +81,18 @@ export default function Cotizador() {
       const draftHasSelected = localStorage.getItem('fl_draft_hasSelectedClient');
       const draftQuoteId = localStorage.getItem('fl_draft_currentQuoteId');
 
+      const currentUser = getAuthUser();
+      const currentUserName = currentUser?.nombre || currentUser?.username || 'Asesor Fitness Life';
+
       if (draftQuoteId) setCurrentQuoteId(JSON.parse(draftQuoteId));
-      if (draftClient) setClient(JSON.parse(draftClient));
+      if (draftClient) {
+        const parsed = JSON.parse(draftClient);
+        // Asegurar que el asesor comercial sea siempre el usuario actualmente autenticado
+        parsed.adviser = currentUserName;
+        setClient(parsed);
+      } else {
+        setClient(prev => ({ ...prev, adviser: currentUserName }));
+      }
       if (draftItems) setItems(JSON.parse(draftItems));
       if (draftSearchQuery) setClientSearchQuery(draftSearchQuery);
       if (draftHasSelected) setHasSelectedClient(JSON.parse(draftHasSelected));
