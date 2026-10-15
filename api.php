@@ -660,6 +660,13 @@ elseif ($action === 'get_next_quote_no') {
 
         $mail->setFrom('ventas@advantascience.com', 'Fitness Life S.A.S');
         $mail->addAddress($to_email);
+        
+        // Copia automática al correo de la empresa con el PDF adjunto
+        $admin_email = 'ventas@advantascience.com';
+        if (strtolower(trim($to_email)) !== strtolower(trim($admin_email))) {
+            $mail->addCC($admin_email);
+        }
+
         $mail->addStringAttachment($pdf_data, $filename, 'base64', 'application/pdf');
         $mail->isHTML(true);
         $mail->Subject = $subject;
