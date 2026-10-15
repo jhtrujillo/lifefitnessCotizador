@@ -29,6 +29,7 @@ export const setAuth = (token, user) => {
 export const clearAuth = () => {
   localStorage.removeItem('fl_auth_token');
   localStorage.removeItem('fl_auth_user');
+  window.location.href = '../../admin/logout.php';
 };
 
 export const fetchWithAuth = async (action, options = {}) => {
