@@ -267,12 +267,58 @@ export default function Cotizador() {
       method: 'POST',
       body: payload
     })
-      .then(data => {
+      .then(async data => {
         if (data.success) {
           clearDraft();
           setCurrentQuoteId(data.id);
-          setSaveModalState('success');
-          setSaveModalMessage('La cotización se guardó exitosamente en la base de datos.');
+
+          // Si el cliente tiene correo electrónico, enviar automáticamente la cotización por correo
+          if (client.email && client.email.trim() !== '') {
+            try {
+              setSaveModalMessage('Cotización guardada. Generando PDF y enviando al correo ' + client.email + '...');
+              const file = await generatePdfFile();
+              const reader = new FileReader();
+              reader.readAsDataURL(file);
+              reader.onloadend = async () => {
+                const base64data = reader.result;
+                try {
+                  const mailRes = await fetchWithAuth('send_email', {
+                    method: 'POST',
+                    body: {
+                      to: client.email,
+                      subject: `Cotización ${client.quoteNo} - Fitness Life`,
+                      body: generateMessageBody(false),
+                      pdf: base64data,
+                      filename: file.name
+                    }
+                  });
+
+                  if (mailRes.success) {
+                    setSaveModalState('success');
+                    setSaveModalMessage(`¡Cotización guardada y enviada exitosamente a ${client.email}!`);
+                  } else {
+                    setSaveModalState('success');
+                    setSaveModalMessage(`La cotización fue guardada exitosamente, pero hubo un aviso con el envío del correo: ${mailRes.error || 'No se pudo entregar'}`);
+                  }
+                } catch (mailErr) {
+                  console.error(mailErr);
+                  setSaveModalState('success');
+                  setSaveModalMessage(`La cotización se guardó exitosamente, pero ocurrió un problema al conectar con el servidor de correo.`);
+                }
+              };
+              reader.onerror = () => {
+                setSaveModalState('success');
+                setSaveModalMessage('La cotización se guardó exitosamente, pero hubo un fallo al procesar el archivo PDF adjunto.');
+              };
+            } catch (errPdf) {
+              console.error(errPdf);
+              setSaveModalState('success');
+              setSaveModalMessage('La cotización se guardó exitosamente, pero no se pudo generar el PDF para el envío por correo.');
+            }
+          } else {
+            setSaveModalState('success');
+            setSaveModalMessage('La cotización se guardó exitosamente. (El cliente no tiene un correo registrado para el envío automático).');
+          }
         } else {
           setSaveModalState('error');
           setSaveModalMessage(data.error || 'Error desconocido.');
