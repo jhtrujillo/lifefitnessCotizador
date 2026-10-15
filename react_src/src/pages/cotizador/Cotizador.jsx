@@ -900,21 +900,8 @@ export default function Cotizador() {
             {/* Buscador de Equipos */}
             <div className="panel-card" style={{ marginBottom: '24px', position: 'relative' }}>
               <h3 style={{ margin: '0 0 16px', fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', color: '#1d3557', fontSize: '16px' }}>🔍 Buscar y Añadir Equipos del Catálogo</h3>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <div style={{ display: 'flex', flexGrow: 2, minWidth: '220px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', background: '#f7f7f7', border: '1px solid #d8d8d8', borderRight: 'none', borderRadius: '6px 0 0 6px', fontSize: '16px', color: '#999999' }}>🔍</span>
-                  <input 
-                    value={productSearchQuery} 
-                    onChange={(e) => {
-                      setProductSearchQuery(e.target.value);
-                      setShowProductSuggestions(true);
-                    }} 
-                    onFocus={() => setShowProductSuggestions(true)}
-                    placeholder="Buscar por nombre, código SKU o descripción..." 
-                    style={{ width: '100%', boxSizing: 'border-box', background: 'white', border: '1px solid #d8d8d8', borderLeft: 'none', borderRadius: '0 6px 6px 0', padding: '10px 12px 10px 0', fontSize: '13px', fontWeight: 600, color: '#333333', cursor: 'text' }}
-                  />
-                </div>
-
+              {/* Fila 1: Filtros de Categoría, Marca y Serie */}
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '12px' }}>
                 {/* Filtro: Categoría */}
                 <select
                   value={selectedCategory}
@@ -922,7 +909,7 @@ export default function Cotizador() {
                     setSelectedCategory(e.target.value);
                     setShowProductSuggestions(true);
                   }}
-                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flexGrow: 1, minWidth: '150px' }}
+                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flex: '1 1 180px' }}
                 >
                   <option value="">📁 Todas las categorías</option>
                   {categoryOptions.map(cat => (
@@ -937,7 +924,7 @@ export default function Cotizador() {
                     setSelectedBrand(e.target.value);
                     setShowProductSuggestions(true);
                   }}
-                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flexGrow: 1, minWidth: '130px' }}
+                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flex: '1 1 150px' }}
                 >
                   <option value="">🏷️ Todas las marcas</option>
                   {brandOptions.map(b => (
@@ -952,7 +939,7 @@ export default function Cotizador() {
                     setSelectedSerie(e.target.value);
                     setShowProductSuggestions(true);
                   }}
-                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flexGrow: 1, minWidth: '120px' }}
+                  style={{ background: '#f7f7f7', border: '1px solid #d8d8d8', borderRadius: '6px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, color: '#1d3557', cursor: 'pointer', height: '41px', flex: '1 1 140px' }}
                 >
                   <option value="">⚡ Todas las series</option>
                   {serieOptions.map(s => (
@@ -971,9 +958,24 @@ export default function Cotizador() {
                     style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', borderRadius: '6px', padding: '10px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', height: '41px', whiteSpace: 'nowrap' }}
                     title="Restablecer filtros"
                   >
-                    ✕ Limpiar
+                    ✕ Limpiar filtros
                   </button>
                 )}
+              </div>
+
+              {/* Fila 2: Campo de Búsqueda */}
+              <div style={{ display: 'flex', width: '100%' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '42px', background: '#f7f7f7', border: '1px solid #d8d8d8', borderRight: 'none', borderRadius: '6px 0 0 6px', fontSize: '16px', color: '#999999' }}>🔍</span>
+                <input 
+                  value={productSearchQuery} 
+                  onChange={(e) => {
+                    setProductSearchQuery(e.target.value);
+                    setShowProductSuggestions(true);
+                  }} 
+                  onFocus={() => setShowProductSuggestions(true)}
+                  placeholder="Buscar por nombre, código SKU o descripción..." 
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'white', border: '1px solid #d8d8d8', borderLeft: 'none', borderRadius: '0 6px 6px 0', padding: '10px 14px', fontSize: '13px', fontWeight: 600, color: '#333333', cursor: 'text', height: '42px' }}
+                />
               </div>
               
               {showProductSuggestions && (
