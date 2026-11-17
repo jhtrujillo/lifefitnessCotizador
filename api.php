@@ -14,9 +14,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // =========================================================================
 // CONFIGURACIÓN DE BASE DE DATOS
 // =========================================================================
-$entorno = ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_NAME'] === '127.0.0.1' || strpos($_SERVER['SERVER_NAME'], '.local') !== false) ? 'LOCAL' : 'PRODUCCION';
+$serverName = $_SERVER['SERVER_NAME'] ?? 'localhost';
+$isFitnessLife = (strpos($serverName, 'fitnesslifesas.com') !== false);
+$isLocal = ($serverName === 'localhost' || $serverName === '127.0.0.1' || strpos($serverName, '.local') !== false || strpos($serverName, '192.168.') !== false || php_sapi_name() === 'cli');
 
-if ($entorno === "LOCAL") {
+if ($isFitnessLife) {
+    $host = "localhost";
+    $port = "3306";
+    $dbname = "fitnessl_cotizaciones";
+    $username = "fitnessl_user";
+    $password = "FitLife_2026*Prod!Db";
+} else if ($isLocal) {
     $host = "127.0.0.1";
     $port = "8889";
     $dbname = "cotizacioneslifefitness";
@@ -567,8 +575,10 @@ elseif ($action === 'get_next_quote_no') {
 } elseif ($action === 'generate_pdf') {
     require_auth($pdo);
     try {
-        ini_set('memory_limit', '256M');
-        set_time_limit(60);
+        @ini_set('memory_limit', '256M');
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(60);
+        }
         ob_start(); // Prevent warnings from breaking JSON
         
         $input = json_decode(file_get_contents('php://input'), true);
@@ -662,7 +672,7 @@ elseif ($action === 'get_next_quote_no') {
         $mail->addAddress($to_email);
         
         // Copia automática al correo de la empresa con el PDF adjunto
-        $admin_email = 'ventas@advantascience.com';
+        $admin_email = 'fitnesslifesas@gmail.com';
         if (strtolower(trim($to_email)) !== strtolower(trim($admin_email))) {
             $mail->addCC($admin_email);
         }

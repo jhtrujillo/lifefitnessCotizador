@@ -10,16 +10,34 @@ if (!$input) {
     exit;
 }
 
-// Database Connection
-$isLocal = ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_NAME'] === '127.0.0.1' || strpos($_SERVER['SERVER_NAME'], '192.168.') !== false);
+$serverName = $_SERVER['SERVER_NAME'] ?? 'localhost';
+$isFitnessLife = (strpos($serverName, 'fitnesslifesas.com') !== false);
+$isLocal = ($serverName === 'localhost' || $serverName === '127.0.0.1' || strpos($serverName, '.local') !== false || strpos($serverName, '192.168.') !== false || php_sapi_name() === 'cli');
 
-$dbhost = $isLocal ? 'localhost' : 'mysql.advantascience.com';
-$dbport = $isLocal ? '8889' : '3306';
-$dbuser = $isLocal ? 'root' : 'lifefitnesdb'; 
-$dbpass = $isLocal ? 'root' : 'JT-sq16cy21';
-$dbname = 'cotizacioneslifefitness';
+if ($isFitnessLife) {
+    $dbhost = 'localhost';
+    $dbport = '3306';
+    $dbuser = 'fitnessl_user';
+    $dbpass = 'FitLife_2026*Prod!Db';
+    $dbname = 'fitnessl_cotizaciones';
+    $base_url = "https://www.fitnesslifesas.com/";
+} else if ($isLocal) {
+    $dbhost = 'localhost';
+    $dbport = '8889';
+    $dbuser = 'root';
+    $dbpass = 'root';
+    $dbname = 'cotizacioneslifefitness';
+    $base_url = "http://localhost:8888/12.fitnesslife/";
+} else {
+    $dbhost = 'mysql.advantascience.com';
+    $dbport = '3306';
+    $dbuser = 'lifefitnesdb';
+    $dbpass = 'JT-sq16cy21';
+    $dbname = 'cotizacioneslifefitness';
+    $base_url = "https://advantascience.com/fitnesslife/";
+}
 
-$conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname, $dbport);
+$conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname, (int)$dbport);
 
 $nombre = trim($input['name'] ?? '');
 $empresa = trim($input['company'] ?? '');
@@ -42,7 +60,7 @@ if (!$conn->connect_error) {
 }
 
 // Configuración de destinatarios
-$to_administrador = "ventas@advantascience.com"; 
+$to_administrador = "fitnesslifesas@gmail.com"; 
 $to_cliente = $email;
 
 $subject_admin = "🔔 Nueva Solicitud de Cotización Web: " . ($nombre ?: 'Cliente Web');
@@ -50,7 +68,6 @@ $subject_cliente = "🏋️ Hemos recibido tu solicitud de cotización - Fitness
 
 // Construir tabla HTML de productos
 $items_count = count($items);
-$base_url = "https://advantascience.com/fitnesslife/";
 
 $items_rows = "";
 if ($items_count > 0) {
@@ -117,7 +134,7 @@ function renderEmailTemplate($title, $headerGreeting, $introMessage, $clientCard
             <!-- Cabecera -->
             <tr>
                 <td style='background: linear-gradient(135deg, #1d3557 0%, #0d1b2a 100%); padding: 28px 32px; text-align: center; border-bottom: 4px solid #e63946;'>
-                    <img src='https://advantascience.com/fitnesslife/assets/logo.png' alt='Fitness Life S.A.S' style='height: 48px; background: white; padding: 6px 12px; border-radius: 6px; display: inline-block; margin-bottom: 12px;'>
+                    <img src='{$base_url}assets/logo.png' alt='Fitness Life S.A.S' style='height: 48px; background: white; padding: 6px 12px; border-radius: 6px; display: inline-block; margin-bottom: 12px;'>
                     <h1 style='color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;'>$title</h1>
                 </td>
             </tr>
@@ -144,7 +161,7 @@ function renderEmailTemplate($title, $headerGreeting, $introMessage, $clientCard
                 <td style='background-color: #f8fafc; padding: 24px 32px; text-align: center; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 12px; line-height: 1.5;'>
                     <strong style='color: #1e293b;'>FITNESS LIFE S.A.S</strong> — Importador Directo Autorizado en Colombia<br>
                     📞 PBX / WhatsApp: <a href='https://wa.me/573128011838' style='color: #e63946; text-decoration: none; font-weight: 700;'>+57 (312) 801-1838</a> | +57 (312) 719-9008<br>
-                    ✉️ <a href='mailto:ventas@advantascience.com' style='color: #1d3557; text-decoration: none;'>ventas@advantascience.com</a> — Cali, Colombia
+                    ✉️ <a href='mailto:{$to_administrador}' style='color: #1d3557; text-decoration: none;'>{$to_administrador}</a> — Cali, Colombia
                 </td>
             </tr>
         </table>
@@ -194,7 +211,7 @@ $body_admin = renderEmailTemplate(
     $clientCard,
     $items_table,
     "<div style='margin-top: 24px; text-align: center;'>
-        <a href='https://advantascience.com/fitnesslife/v1/cotizaciones/cotizador.html' style='display: inline-block; background: #e63946; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-weight: 700; text-decoration: none; font-size: 13px; text-transform: uppercase;'>Abrir Cotizador Comercial &rarr;</a>
+        <a href='{$base_url}v1/cotizaciones/cotizador.html' style='display: inline-block; background: #e63946; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-weight: 700; text-decoration: none; font-size: 13px; text-transform: uppercase;'>Abrir Cotizador Comercial &rarr;</a>
     </div>"
 );
 

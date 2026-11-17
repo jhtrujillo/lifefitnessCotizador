@@ -125,7 +125,7 @@ export default function VerCotizacion() {
           <tfoot>
             <tr><td>
               <div className="pdf-running-footer">
-                FITNESS LIFE S.A.S — Importador Directo Autorizado en Colombia · ventas@fitnesslifesas.com · +57 (1) 555-0100
+                FITNESS LIFE S.A.S — Cra 1 # 30-75 barrio Fátima, Cali · fitnesslifesas@gmail.com · 312-8011838 · 312-7199008
               </div>
             </td></tr>
           </tfoot>
@@ -162,8 +162,8 @@ export default function VerCotizacion() {
             <div style={{ fontSize: '13px', lineHeight: '1.9' }}>
               <div style={{ fontWeight: 600, color: '#333333', fontSize: '14px' }}>{client.adviser}</div>
               <div>Fitness Life S.A.S</div>
-              <div>ventas@fitnesslifesas.com</div>
-              <div>+57 (1) 555-0100</div>
+              <div>fitnesslifesas@gmail.com</div>
+              <div>312-8011838 · 312-7199008</div>
             </div>
           </div>
         </div>
@@ -237,8 +237,8 @@ export default function VerCotizacion() {
 
         {/* Pie de Página Documento (pantalla; en impresión se usa el pie recurrente) */}
         <div className="quote-footer avoid-break" style={{ borderTop: '1px solid #d8d8d8', paddingTop: '12px', marginTop: '48px', fontSize: '10px', color: '#7f7f7f', letterSpacing: '.04em', textAlign: 'center', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-          <div style={{ marginBottom: '6px' }}>FITNESS LIFE S.A.S — Importador Directo Autorizado en Colombia</div>
-          <div>ventas@fitnesslifesas.com · +57 (1) 555-0100</div>
+          <div style={{ marginBottom: '6px' }}>FITNESS LIFE S.A.S — Cra 1 # 30-75 barrio Fátima, Cali</div>
+          <div>fitnesslifesas@gmail.com · 312-8011838 · 312-7199008</div>
         </div>
 
             </td></tr>
