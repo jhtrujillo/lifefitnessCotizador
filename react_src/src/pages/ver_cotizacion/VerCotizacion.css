@@ -103,15 +103,15 @@ body {
   .print-container .items-table { margin-bottom: 14px !important; }
   .print-container .items-table thead th { padding: 8px 10px !important; }
   .print-container .items-table tbody td { padding: 8px 10px !important; }
-  .print-container .img-cell { width: 140px !important; text-align: center !important; }
+  .print-container .img-cell { width: 220px !important; text-align: center !important; }
   .print-container .row-img {
-    width: 130px !important;
-    height: 100px !important;
-    max-width: 130px !important;
-    max-height: 100px !important;
+    width: 210px !important;
+    height: 160px !important;
+    max-width: 210px !important;
+    max-height: 160px !important;
     background: #f8f9fa !important;
     border: 1px solid #e2e8f0 !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;

@@ -81,20 +81,20 @@ if ($items_count > 0) {
         $imgTag = "";
         if (!empty($pImg)) {
             $imgUrl = (strpos($pImg, 'http') === 0) ? $pImg : ($base_url . ltrim($pImg, '/'));
-            $imgTag = "<img src='$imgUrl' alt='$pName' style='width:90px; height:90px; object-fit:contain; border-radius:8px; background:#f8fafc; border:1px solid #e2e8f0; display:block; margin:0 auto;'>";
+            $imgTag = "<img src='$imgUrl' alt='$pName' style='width:130px; height:130px; object-fit:contain; border-radius:8px; background:#f8fafc; border:1px solid #e2e8f0; display:block; margin:0 auto;'>";
         } else {
-            $imgTag = "<div style='width:90px; height:90px; border-radius:8px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:28px; margin:0 auto;'>🏋️</div>";
+            $imgTag = "<div style='width:130px; height:130px; border-radius:8px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:36px; margin:0 auto;'>🏋️</div>";
         }
 
         $bgRow = ($idx % 2 === 0) ? "#ffffff" : "#f8fafc";
         $items_rows .= "
         <tr style='background: $bgRow; border-bottom: 1px solid #e2e8f0;'>
-            <td style='padding: 12px; text-align: center; width: 100px;'>$imgTag</td>
-            <td style='padding: 12px;'>
-                <div style='font-weight: 700; color: #1e293b; font-size: 14px;'>$pName</div>
-                <div style='font-size: 12px; color: #64748b; margin-top: 2px;'>$pSerie SKU: <strong>$sku</strong></div>
+            <td style='padding: 12px; text-align: center; width: 140px;'>$imgTag</td>
+            <td style='padding: 12px; vertical-align: middle;'>
+                <div style='font-weight: 700; color: #1e293b; font-size: 15px;'>$pName</div>
+                <div style='font-size: 13px; color: #64748b; margin-top: 4px;'>$pSerie SKU: <strong>$sku</strong></div>
             </td>
-            <td style='padding: 12px; text-align: center; font-weight: 700; color: #0f172a; font-size: 15px; width: 80px;'>$pQty</td>
+            <td style='padding: 12px; text-align: center; font-weight: 700; color: #0f172a; font-size: 16px; width: 80px; vertical-align: middle;'>$pQty</td>
         </tr>";
     }
 } else {
