@@ -1075,7 +1075,7 @@ export default function Cotizador() {
                 <table className="editor-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid #eaeaea', textAlign: 'left', color: '#888888', fontWeight: 600 }}>
-                      <th style={{ padding: '10px', width: '50px' }}>Imagen</th>
+                      <th style={{ padding: '10px', width: '70px' }}>Imagen</th>
                       <th style={{ padding: '10px' }}>Nombre & Descripción del Equipo</th>
                       <th style={{ padding: '10px', width: '70px', textAlign: 'center' }}>Cant.</th>
                       <th style={{ padding: '10px', width: '120px', textAlign: 'right' }}>Precio Unit. (COP)</th>
@@ -1087,7 +1087,7 @@ export default function Cotizador() {
                     {items.map((item, idx) => (
                       <tr key={item.id} style={{ borderBottom: '1px solid #eaeaea' }}>
                         <td className="img-cell" style={{ padding: '10px', verticalAlign: 'middle', textAlign: 'center' }}>
-                          <img src={item.img || 'assets/cat_pesas.jpg'} alt="" style={{ width: '50px', height: '40px', objectFit: 'contain', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: '4px' }} />
+                          <img src={item.img || 'assets/cat_pesas.jpg'} alt="" style={{ width: '64px', height: '52px', objectFit: 'contain', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: '6px' }} />
                         </td>
                         <td className="desc-cell" style={{ padding: '10px', verticalAlign: 'top' }}>
                           <input value={item.name} onChange={(e) => handleUpdateItem(idx, 'name', e.target.value)} style={{ fontWeight: 600, color: '#262626', width: '100%', background: '#f9f9f9', borderBottom: '1px solid transparent', padding: '4px' }} placeholder="Nombre del equipo" />
@@ -1307,19 +1307,19 @@ export default function Cotizador() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '30px' }}>
             <thead>
               <tr style={{ background: '#2d2d2d', color: 'white' }}>
-                <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '104px' }}>Imagen</th>
+                <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '140px' }}>Imagen</th>
                 <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase' }}>Descripción</th>
-                <th style={{ padding: '11px 10px', textAlign: 'center', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '52px' }}>Cant.</th>
-                <th style={{ padding: '11px 10px', textAlign: 'right', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '104px' }}>Vr. Unitario</th>
+                <th style={{ padding: '11px 10px', textAlign: 'center', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '45px' }}>Cant.</th>
+                <th style={{ padding: '11px 10px', textAlign: 'right', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '105px' }}>Vr. Unitario</th>
                 <th style={{ padding: '11px 10px', textAlign: 'right', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '110px' }}>Vr. Total</th>
               </tr>
             </thead>
             <tbody>
               {items.map((row, idx) => (
                 <tr key={row.id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                  <td data-label="Imagen" className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'top', textAlign: 'center' }}>
-                    <div className="row-img" style={{ width: '84px', height: '66px', border: '1px dashed #c6c6c6', background: '#f7f7f7', overflow: 'hidden', borderRadius: '4px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <img src={row.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <td data-label="Imagen" className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'top', textAlign: 'center', width: '140px' }}>
+                    <div className="row-img" style={{ width: '130px', height: '100px', border: '1px solid #e2e8f0', background: '#f8f9fa', overflow: 'hidden', borderRadius: '6px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={row.img} alt="" style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
                     </div>
                   </td>
                   <td data-label="Descripción" className="desc-cell" style={{ padding: '12px 10px', verticalAlign: 'top' }}>

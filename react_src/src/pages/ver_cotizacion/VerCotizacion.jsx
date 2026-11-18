@@ -173,20 +173,20 @@ export default function VerCotizacion() {
           <table className="items-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '30px' }}>
             <thead>
               <tr style={{ background: '#2d2d2d', color: 'white' }}>
-                <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '104px' }}>Imagen</th>
+                <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '140px' }}>Imagen</th>
                 <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase' }}>Descripción</th>
-                <th style={{ padding: '11px 10px', textAlign: 'center', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '52px' }}>Cant.</th>
-                <th style={{ padding: '11px 10px', textAlign: 'right', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '104px' }}>Vr. Unitario</th>
+                <th style={{ padding: '11px 10px', textAlign: 'center', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '45px' }}>Cant.</th>
+                <th style={{ padding: '11px 10px', textAlign: 'right', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '105px' }}>Vr. Unitario</th>
                 <th style={{ padding: '11px 10px', textAlign: 'right', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '110px' }}>Vr. Total</th>
               </tr>
             </thead>
             <tbody>
               {items.map((row, index) => (
                 <tr key={index} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                  <td style={{ padding: '12px 10px', verticalAlign: 'top' }}>
-                    <div className="row-img" style={{ width: '84px', height: '66px', border: '1px dashed #c6c6c6', background: '#f7f7f7', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '4px' }}>
+                  <td className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'top', width: '140px' }}>
+                    <div className="row-img" style={{ width: '130px', height: '100px', border: '1px solid #e2e8f0', background: '#f8f9fa', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '6px', margin: '0 auto' }}>
                       {row.img ? (
-                        <img src={row.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        <img src={row.img} alt="" style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
                       ) : (
                         <span style={{ fontSize: '10px', color: '#ccc' }}>No img</span>
                       )}

@@ -336,9 +336,31 @@ input, textarea, select {
 .pdf-doc .doc-head { margin-bottom: 16px !important; padding-bottom: 12px !important; }
 .pdf-doc .info-grid-mobile { margin-bottom: 16px !important; }
 .pdf-doc table { margin-bottom: 14px !important; }
-.pdf-doc thead th { padding: 7px 9px !important; }
-.pdf-doc tbody td { padding: 7px 9px !important; }
-.pdf-doc .row-img { width: 58px !important; height: 46px !important; }
+.pdf-doc thead th { padding: 8px 10px !important; }
+.pdf-doc tbody td { padding: 8px 10px !important; }
+.pdf-doc .img-cell { width: 140px !important; text-align: center !important; }
+.pdf-doc .row-img {
+  width: 130px !important;
+  height: 100px !important;
+  max-width: 130px !important;
+  max-height: 100px !important;
+  background: #f8f9fa !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
+}
+.pdf-doc .row-img img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
 .pdf-doc .quote-terms { margin-top: 18px !important; padding-top: 14px !important; }
 .pdf-doc .quote-footer { margin-top: 16px !important; }
 
