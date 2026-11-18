@@ -338,12 +338,12 @@ input, textarea, select {
 .pdf-doc table { margin-bottom: 14px !important; }
 .pdf-doc thead th { padding: 8px 10px !important; }
 .pdf-doc tbody td { padding: 8px 10px !important; }
-.pdf-doc .img-cell { width: 220px !important; text-align: center !important; }
+.pdf-doc .img-cell { width: 250px !important; text-align: center !important; }
 .pdf-doc .row-img {
-  width: 210px !important;
-  height: 160px !important;
-  max-width: 210px !important;
-  max-height: 160px !important;
+  width: 240px !important;
+  height: 180px !important;
+  max-width: 240px !important;
+  max-height: 180px !important;
   background: #f8f9fa !important;
   border: 1px solid #e2e8f0 !important;
   border-radius: 8px !important;

@@ -1307,7 +1307,7 @@ export default function Cotizador() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '30px' }}>
             <thead>
               <tr style={{ background: '#2d2d2d', color: 'white' }}>
-                <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '220px' }}>Imagen</th>
+                <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '250px' }}>Imagen</th>
                 <th style={{ padding: '11px 10px', textAlign: 'left', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase' }}>Descripción</th>
                 <th style={{ padding: '11px 10px', textAlign: 'center', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '40px' }}>Cant.</th>
                 <th style={{ padding: '11px 10px', textAlign: 'right', fontFamily: 'Oswald, sans-serif', fontWeight: 500, letterSpacing: '.1em', fontSize: '10px', textTransform: 'uppercase', width: '95px' }}>Vr. Unitario</th>
@@ -1317,8 +1317,8 @@ export default function Cotizador() {
             <tbody>
               {items.map((row, idx) => (
                 <tr key={row.id} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                  <td data-label="Imagen" className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'middle', textAlign: 'center', width: '220px' }}>
-                    <div className="row-img" style={{ width: '210px', height: '160px', border: '1px solid #e2e8f0', background: '#f8f9fa', overflow: 'hidden', borderRadius: '8px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <td data-label="Imagen" className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'middle', textAlign: 'center', width: '250px' }}>
+                    <div className="row-img" style={{ width: '240px', height: '180px', border: '1px solid #e2e8f0', background: '#f8f9fa', overflow: 'hidden', borderRadius: '8px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <img src={row.img} alt="" style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto', objectFit: 'contain' }} />
                     </div>
                   </td>
