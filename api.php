@@ -158,6 +158,35 @@ $action = $_GET['action'] ?? '';
 // AUTENTICACIÓN Y GESTIÓN DE USUARIOS
 // ==========================================================
 if ($action === 'login') {
+    $rawIp = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $clientIp = trim(explode(',', $rawIp)[0]);
+
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS intentos_login (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            ip VARCHAR(45) NOT NULL UNIQUE,
+            intentos INT DEFAULT 1,
+            bloqueado_hasta DATETIME NULL,
+            ultimo_intento DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Exception $e) {}
+
+    $stmtLock = $pdo->prepare("SELECT intentos, bloqueado_hasta FROM intentos_login WHERE ip = ?");
+    $stmtLock->execute([$clientIp]);
+    $lockData = $stmtLock->fetch(PDO::FETCH_ASSOC);
+
+    if ($lockData && !empty($lockData['bloqueado_hasta'])) {
+        $blockExpiry = strtotime($lockData['bloqueado_hasta']);
+        if ($blockExpiry > time()) {
+            $minsLeft = ceil(($blockExpiry - time()) / 60);
+            echo json_encode(["success" => false, "error" => "Demasiados intentos fallidos. Acceso bloqueado temporalmente por seguridad ($minsLeft min restantes)."]);
+            exit;
+        } else {
+            $pdo->prepare("UPDATE intentos_login SET intentos = 0, bloqueado_hasta = NULL WHERE ip = ?")->execute([$clientIp]);
+            $lockData['intentos'] = 0;
+        }
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
     $username = $input['username'] ?? '';
     $password = $input['password'] ?? '';
@@ -167,6 +196,9 @@ if ($action === 'login') {
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
+        // Limpiar intentos de esta IP tras éxito
+        $pdo->prepare("DELETE FROM intentos_login WHERE ip = ?")->execute([$clientIp]);
+
         // Verificar si tiene permiso para el módulo del cotizador
         $acceso_cotizador = isset($user['acceso_cotizador']) ? (int)$user['acceso_cotizador'] : 1;
         if ($acceso_cotizador === 0) {
@@ -202,7 +234,21 @@ if ($action === 'login') {
             ]
         ]);
     } else {
-        echo json_encode(["success" => false, "error" => "Usuario o contraseña incorrectos."]);
+        // Pausa anti-bot de 400ms para neutralizar ataques de diccionario
+        usleep(400000);
+
+        $attempts = ($lockData['intentos'] ?? 0) + 1;
+        if ($attempts >= 5) {
+            $blockUntil = date('Y-m-d H:i:s', time() + (15 * 60));
+            $stmtUpd = $pdo->prepare("INSERT INTO intentos_login (ip, intentos, bloqueado_hasta, ultimo_intento) VALUES (?, ?, ?, NOW()) ON DUPLICATE KEY UPDATE intentos = ?, bloqueado_hasta = ?, ultimo_intento = NOW()");
+            $stmtUpd->execute([$clientIp, $attempts, $blockUntil, $attempts, $blockUntil]);
+            echo json_encode(["success" => false, "error" => "Has superado el límite de 5 intentos. Acceso bloqueado por 15 minutos."]);
+        } else {
+            $stmtUpd = $pdo->prepare("INSERT INTO intentos_login (ip, intentos, bloqueado_hasta, ultimo_intento) VALUES (?, ?, NULL, NOW()) ON DUPLICATE KEY UPDATE intentos = ?, ultimo_intento = NOW()");
+            $stmtUpd->execute([$clientIp, $attempts, $attempts]);
+            $restantes = 5 - $attempts;
+            echo json_encode(["success" => false, "error" => "Usuario o contraseña incorrectos. (Intentos restantes: $restantes)"]);
+        }
     }
 }
 elseif ($action === 'logout') {
