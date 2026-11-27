@@ -109,10 +109,16 @@ export default function Cotizador() {
       if (draftItems) {
         try {
           const parsedDraft = JSON.parse(draftItems);
-          const cleanedDraft = Array.isArray(parsedDraft) ? parsedDraft.map(it => ({
-            ...it,
-            name: (it.name || '').replace(/^(null\s*-\s*|\s*-\s*)/, '').trim()
-          })) : [];
+          const cleanedDraft = Array.isArray(parsedDraft) ? parsedDraft.map(it => {
+            let name = (it.name || '').replace(/^(null\s*-\s*|\s*-\s*)/, '').trim();
+            if (it.item_no) {
+              const prefix = it.item_no.trim().toLowerCase() + ' - ';
+              if (name.toLowerCase().startsWith(prefix)) {
+                name = name.substring(prefix.length).trim();
+              }
+            }
+            return { ...it, name };
+          }) : [];
           setItems(cleanedDraft);
         } catch (e) {
           setItems([]);
@@ -171,11 +177,10 @@ export default function Cotizador() {
             const categoria = (p.categoria_nombre && p.categoria_nombre.trim()) || '';
             const itemNo = (p.item_no && p.item_no.trim()) || '';
             const rawCleanName = (p.name && p.name.trim().replace(/^(null\s*-\s*|\s*-\s*)/, '').trim()) || '';
-            const displayName = itemNo ? `${itemNo} - ${rawCleanName}` : rawCleanName;
 
             return {
               id: p.id,
-              name: displayName,
+              name: rawCleanName,
               item_no: itemNo,
               rawName: rawCleanName,
               brand: marca,
@@ -230,10 +235,16 @@ export default function Cotizador() {
               try { itemsData = JSON.parse(itemsData); } catch (e) {}
             }
             if (Array.isArray(itemsData)) {
-              itemsData = itemsData.map(it => ({
-                ...it,
-                name: (it.name || '').replace(/^(null\s*-\s*|\s*-\s*)/, '').trim()
-              }));
+              itemsData = itemsData.map(it => {
+                let name = (it.name || '').replace(/^(null\s*-\s*|\s*-\s*)/, '').trim();
+                if (it.item_no) {
+                  const prefix = it.item_no.trim().toLowerCase() + ' - ';
+                  if (name.toLowerCase().startsWith(prefix)) {
+                    name = name.substring(prefix.length).trim();
+                  }
+                }
+                return { ...it, name };
+              });
             }
 
             setCurrentQuoteId(q.id);
@@ -827,6 +838,7 @@ export default function Cotizador() {
   const filteredProducts = productsList.filter(p => {
     const matchesQuery = pQuery.length === 0 || 
       (p.name || "").toString().toLowerCase().includes(pQuery) || 
+      (p.item_no && p.item_no.toLowerCase().includes(pQuery)) ||
       (p.brand && p.brand.toLowerCase().includes(pQuery)) ||
       (p.serie && p.serie.toLowerCase().includes(pQuery)) ||
       (p.categoryName && p.categoryName.toLowerCase().includes(pQuery));
