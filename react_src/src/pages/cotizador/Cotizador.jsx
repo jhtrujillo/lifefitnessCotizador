@@ -65,6 +65,17 @@ export default function Cotizador() {
   const [emailModalState, setEmailModalState] = useState('none'); // none, sending, success, error
   const [emailModalMessage, setEmailModalMessage] = useState('');
 
+  // Lightbox Zoom Modal
+  const [zoomedImage, setZoomedImage] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setZoomedImage(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Load draft on mount if no active quote in URL
   useEffect(() => {
     fetchClients();
@@ -1075,7 +1086,7 @@ export default function Cotizador() {
                 <table className="editor-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid #eaeaea', textAlign: 'left', color: '#888888', fontWeight: 600 }}>
-                      <th style={{ padding: '10px', width: '70px' }}>Imagen</th>
+                      <th style={{ padding: '10px', width: '135px', textAlign: 'center' }}>Imagen</th>
                       <th style={{ padding: '10px' }}>Nombre & Descripción del Equipo</th>
                       <th style={{ padding: '10px', width: '70px', textAlign: 'center' }}>Cant.</th>
                       <th style={{ padding: '10px', width: '120px', textAlign: 'right' }}>Precio Unit. (COP)</th>
@@ -1086,8 +1097,49 @@ export default function Cotizador() {
                   <tbody>
                     {items.map((item, idx) => (
                       <tr key={item.id} style={{ borderBottom: '1px solid #eaeaea' }}>
-                        <td className="img-cell" style={{ padding: '10px', verticalAlign: 'middle', textAlign: 'center' }}>
-                          <img src={item.img || 'assets/cat_pesas.jpg'} alt="" style={{ width: '64px', height: '52px', objectFit: 'contain', background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: '6px' }} />
+                        <td className="img-cell" style={{ padding: '10px', verticalAlign: 'middle', textAlign: 'center', width: '135px' }}>
+                          <div
+                            onClick={() => setZoomedImage({ url: item.img || 'assets/cat_pesas.jpg', title: item.name })}
+                            title="Haz clic para ampliar la imagen"
+                            style={{
+                              position: 'relative',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'zoom-in',
+                              borderRadius: '8px',
+                              overflow: 'hidden'
+                            }}
+                          >
+                            <img
+                              src={item.img || 'assets/cat_pesas.jpg'}
+                              alt={item.name || ''}
+                              style={{
+                                width: '120px',
+                                height: '95px',
+                                objectFit: 'contain',
+                                background: '#fafafa',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '8px',
+                                display: 'block',
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
+                            />
+                            <div style={{
+                              position: 'absolute',
+                              bottom: '4px',
+                              right: '4px',
+                              background: 'rgba(29, 53, 87, 0.8)',
+                              color: '#ffffff',
+                              padding: '2px 5px',
+                              borderRadius: '4px',
+                              fontSize: '10px',
+                              lineHeight: 1,
+                              pointerEvents: 'none'
+                            }}>🔍</div>
+                          </div>
                         </td>
                         <td className="desc-cell" style={{ padding: '10px', verticalAlign: 'top' }}>
                           <input value={item.name} onChange={(e) => handleUpdateItem(idx, 'name', e.target.value)} style={{ fontWeight: 600, color: '#262626', width: '100%', background: '#f9f9f9', borderBottom: '1px solid transparent', padding: '4px' }} placeholder="Nombre del equipo" />
@@ -1229,6 +1281,90 @@ export default function Cotizador() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Zoom de Imagen */}
+      {zoomedImage && (
+        <div 
+          onClick={() => setZoomedImage(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.85)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            cursor: 'zoom-out'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            style={{
+              position: 'relative',
+              background: '#ffffff',
+              borderRadius: '12px',
+              padding: '20px',
+              maxWidth: '92vw',
+              maxHeight: '90vh',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.4)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              cursor: 'default'
+            }}
+          >
+            <button
+              onClick={() => setZoomedImage(null)}
+              style={{
+                position: 'absolute',
+                top: '-14px',
+                right: '-14px',
+                background: '#e63946',
+                color: '#ffffff',
+                border: '2px solid #ffffff',
+                borderRadius: '50%',
+                width: '34px',
+                height: '34px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              title="Cerrar vista previa"
+            >
+              ✕
+            </button>
+            <div style={{ maxWidth: '100%', maxHeight: 'calc(85vh - 70px)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <img 
+                src={zoomedImage.url} 
+                alt={zoomedImage.title || 'Vista previa'} 
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: 'calc(85vh - 70px)',
+                  objectFit: 'contain',
+                  borderRadius: '6px'
+                }}
+              />
+            </div>
+            {zoomedImage.title && (
+              <div style={{ marginTop: '14px', fontWeight: 700, fontSize: '16px', color: '#1d3557', textAlign: 'center', fontFamily: 'Oswald, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {zoomedImage.title}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* DOCUMENT VISOR (Print Container) */}
       <div className="print-container print-only pdf-doc" style={{ padding: 0 }}>
