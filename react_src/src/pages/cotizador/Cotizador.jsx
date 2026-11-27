@@ -106,7 +106,18 @@ export default function Cotizador() {
       } else {
         setClient(prev => ({ ...prev, adviser: currentUserName }));
       }
-      if (draftItems) setItems(JSON.parse(draftItems));
+      if (draftItems) {
+        try {
+          const parsedDraft = JSON.parse(draftItems);
+          const cleanedDraft = Array.isArray(parsedDraft) ? parsedDraft.map(it => ({
+            ...it,
+            name: (it.name || '').replace(/^(null\s*-\s*|\s*-\s*)/, '').trim()
+          })) : [];
+          setItems(cleanedDraft);
+        } catch (e) {
+          setItems([]);
+        }
+      }
       if (draftSearchQuery) setClientSearchQuery(draftSearchQuery);
       if (draftHasSelected) setHasSelectedClient(JSON.parse(draftHasSelected));
 
@@ -158,12 +169,15 @@ export default function Cotizador() {
             const marca = (p.series && p.series.trim()) || 'Fitness Life';
             const serie = (p.serie && p.serie.trim()) || '';
             const categoria = (p.categoria_nombre && p.categoria_nombre.trim()) || '';
+            const itemNo = (p.item_no && p.item_no.trim()) || '';
+            const rawCleanName = (p.name && p.name.trim().replace(/^(null\s*-\s*|\s*-\s*)/, '').trim()) || '';
+            const displayName = itemNo ? `${itemNo} - ${rawCleanName}` : rawCleanName;
 
             return {
               id: p.id,
-              name: `${p.item_no} - ${p.name}`,
-              item_no: p.item_no,
-              rawName: p.name,
+              name: displayName,
+              item_no: itemNo,
+              rawName: rawCleanName,
               brand: marca,
               series: marca, // compatibilidad
               serie: serie,
@@ -214,6 +228,12 @@ export default function Cotizador() {
             let itemsData = q.items_json || [];
             if (typeof itemsData === 'string') {
               try { itemsData = JSON.parse(itemsData); } catch (e) {}
+            }
+            if (Array.isArray(itemsData)) {
+              itemsData = itemsData.map(it => ({
+                ...it,
+                name: (it.name || '').replace(/^(null\s*-\s*|\s*-\s*)/, '').trim()
+              }));
             }
 
             setCurrentQuoteId(q.id);
