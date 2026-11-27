@@ -8,6 +8,14 @@ const parseNum = (v) => {
   return isNaN(n) ? 0 : n;
 };
 
+const cleanItemName = (str) => {
+  if (!str) return '';
+  return String(str)
+    .replace(/^(null\s*-\s*|\s*-\s*)/i, '')
+    .replace(/^[A-Za-z0-9_.-]{2,20}\s*-\s*/, '')
+    .trim();
+};
+
 export default function Cotizador() {
   const [currentQuoteId, setCurrentQuoteId] = useState(null);
   
@@ -109,16 +117,10 @@ export default function Cotizador() {
       if (draftItems) {
         try {
           const parsedDraft = JSON.parse(draftItems);
-          const cleanedDraft = Array.isArray(parsedDraft) ? parsedDraft.map(it => {
-            let name = (it.name || '').replace(/^(null\s*-\s*|\s*-\s*)/, '').trim();
-            if (it.item_no) {
-              const prefix = it.item_no.trim().toLowerCase() + ' - ';
-              if (name.toLowerCase().startsWith(prefix)) {
-                name = name.substring(prefix.length).trim();
-              }
-            }
-            return { ...it, name };
-          }) : [];
+          const cleanedDraft = Array.isArray(parsedDraft) ? parsedDraft.map(it => ({
+            ...it,
+            name: cleanItemName(it.name)
+          })) : [];
           setItems(cleanedDraft);
         } catch (e) {
           setItems([]);
@@ -176,7 +178,7 @@ export default function Cotizador() {
             const serie = (p.serie && p.serie.trim()) || '';
             const categoria = (p.categoria_nombre && p.categoria_nombre.trim()) || '';
             const itemNo = (p.item_no && p.item_no.trim()) || '';
-            const rawCleanName = (p.name && p.name.trim().replace(/^(null\s*-\s*|\s*-\s*)/, '').trim()) || '';
+            const rawCleanName = cleanItemName(p.name);
 
             return {
               id: p.id,
@@ -235,16 +237,10 @@ export default function Cotizador() {
               try { itemsData = JSON.parse(itemsData); } catch (e) {}
             }
             if (Array.isArray(itemsData)) {
-              itemsData = itemsData.map(it => {
-                let name = (it.name || '').replace(/^(null\s*-\s*|\s*-\s*)/, '').trim();
-                if (it.item_no) {
-                  const prefix = it.item_no.trim().toLowerCase() + ' - ';
-                  if (name.toLowerCase().startsWith(prefix)) {
-                    name = name.substring(prefix.length).trim();
-                  }
-                }
-                return { ...it, name };
-              });
+              itemsData = itemsData.map(it => ({
+                ...it,
+                name: cleanItemName(it.name)
+              }));
             }
 
             setCurrentQuoteId(q.id);
@@ -690,15 +686,17 @@ export default function Cotizador() {
   };
 
   const selectProduct = (prod) => {
-    const newItems = [...items];
-    const existing = newItems.find(it => it.name === prod.name);
+    const cleanName = cleanItemName(prod.name);
+    const newItems = items.map(it => ({ ...it, name: cleanItemName(it.name) }));
+    const existing = newItems.find(it => cleanItemName(it.name) === cleanName);
     
     if (existing) {
+      existing.name = cleanName;
       existing.qty = parseInt(existing.qty) + 1;
     } else {
       newItems.push({
         id: 'p-' + Date.now(),
-        name: prod.name,
+        name: cleanName,
         desc: prod.desc,
         qty: 1,
         price: prod.price,
@@ -1178,7 +1176,7 @@ export default function Cotizador() {
                           </div>
                         </td>
                         <td className="desc-cell" style={{ padding: '12px 10px', verticalAlign: 'top' }}>
-                          <input value={item.name} onChange={(e) => handleUpdateItem(idx, 'name', e.target.value)} style={{ fontWeight: 600, color: '#262626', width: '100%', background: '#f9f9f9', borderBottom: '1px solid transparent', padding: '6px 8px', fontSize: '14px', borderRadius: '4px' }} placeholder="Nombre del equipo" />
+                          <input value={cleanItemName(item.name)} onChange={(e) => handleUpdateItem(idx, 'name', e.target.value)} style={{ fontWeight: 600, color: '#262626', width: '100%', background: '#f9f9f9', borderBottom: '1px solid transparent', padding: '6px 8px', fontSize: '14px', borderRadius: '4px' }} placeholder="Nombre del equipo" />
                           <textarea value={item.desc} onChange={(e) => handleUpdateItem(idx, 'desc', e.target.value)} rows="4" style={{ fontSize: '12px', color: '#555555', width: '100%', resize: 'none', marginTop: '6px', background: '#f9f9f9', padding: '6px 8px', border: '1px solid transparent', borderRadius: '4px', lineHeight: '1.4' }} placeholder="Descripción..."></textarea>
                         </td>
                         <td data-label="Cant." style={{ padding: '10px', verticalAlign: 'top', textAlign: 'center' }}>
@@ -1495,7 +1493,7 @@ export default function Cotizador() {
                     </div>
                   </td>
                   <td data-label="Descripción" className="desc-cell" style={{ padding: '12px 10px', verticalAlign: 'middle' }}>
-                    <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px', color: '#333333' }}>{row.name}</div>
+                    <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px', color: '#333333' }}>{cleanItemName(row.name)}</div>
                     <div style={{ fontSize: '11.5px', color: '#727272', lineHeight: '1.5', whiteSpace: 'pre-wrap', textAlign: 'left' }}>{row.desc}</div>
                   </td>
                   <td data-label="Cant." style={{ padding: '12px 10px', textAlign: 'center', verticalAlign: 'top', fontWeight: 600, fontSize: '14px' }}>{row.qty}</td>
