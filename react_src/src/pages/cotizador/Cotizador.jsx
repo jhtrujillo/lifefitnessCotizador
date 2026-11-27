@@ -1086,18 +1086,18 @@ export default function Cotizador() {
                 <table className="editor-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
                     <tr style={{ borderBottom: '2px solid #eaeaea', textAlign: 'left', color: '#888888', fontWeight: 600 }}>
-                      <th style={{ padding: '10px', width: '135px', textAlign: 'center' }}>Imagen</th>
-                      <th style={{ padding: '10px' }}>Nombre & Descripción del Equipo</th>
-                      <th style={{ padding: '10px', width: '70px', textAlign: 'center' }}>Cant.</th>
-                      <th style={{ padding: '10px', width: '120px', textAlign: 'right' }}>Precio Unit. (COP)</th>
-                      <th style={{ padding: '10px', width: '120px', textAlign: 'right' }}>Total (COP)</th>
-                      <th style={{ padding: '10px', width: '50px', textAlign: 'center' }}>Acciones</th>
+                      <th style={{ padding: '12px 10px', width: '210px', textAlign: 'center' }}>Imagen</th>
+                      <th style={{ padding: '12px 10px' }}>Nombre & Descripción del Equipo</th>
+                      <th style={{ padding: '12px 10px', width: '70px', textAlign: 'center' }}>Cant.</th>
+                      <th style={{ padding: '12px 10px', width: '120px', textAlign: 'right' }}>Precio Unit. (COP)</th>
+                      <th style={{ padding: '12px 10px', width: '120px', textAlign: 'right' }}>Total (COP)</th>
+                      <th style={{ padding: '12px 10px', width: '50px', textAlign: 'center' }}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {items.map((item, idx) => (
                       <tr key={item.id} style={{ borderBottom: '1px solid #eaeaea' }}>
-                        <td className="img-cell" style={{ padding: '10px', verticalAlign: 'middle', textAlign: 'center', width: '135px' }}>
+                        <td className="img-cell" style={{ padding: '12px 10px', verticalAlign: 'middle', textAlign: 'center', width: '210px' }}>
                           <div
                             onClick={() => setZoomedImage({ url: item.img || 'assets/cat_pesas.jpg', title: item.name })}
                             title="Haz clic para ampliar la imagen"
@@ -1115,8 +1115,8 @@ export default function Cotizador() {
                               src={item.img || 'assets/cat_pesas.jpg'}
                               alt={item.name || ''}
                               style={{
-                                width: '120px',
-                                height: '95px',
+                                width: '200px',
+                                height: '150px',
                                 objectFit: 'contain',
                                 background: '#fafafa',
                                 border: '1px solid #e2e8f0',
@@ -1124,26 +1124,30 @@ export default function Cotizador() {
                                 display: 'block',
                                 transition: 'transform 0.2s ease, box-shadow 0.2s ease'
                               }}
-                              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)'; }}
+                              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.12)'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
                             />
                             <div style={{
                               position: 'absolute',
-                              bottom: '4px',
-                              right: '4px',
-                              background: 'rgba(29, 53, 87, 0.8)',
+                              bottom: '6px',
+                              right: '6px',
+                              background: 'rgba(29, 53, 87, 0.85)',
                               color: '#ffffff',
-                              padding: '2px 5px',
+                              padding: '3px 7px',
                               borderRadius: '4px',
-                              fontSize: '10px',
+                              fontSize: '11px',
+                              fontWeight: 600,
                               lineHeight: 1,
-                              pointerEvents: 'none'
-                            }}>🔍</div>
+                              pointerEvents: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}>🔍 Ampliar</div>
                           </div>
                         </td>
-                        <td className="desc-cell" style={{ padding: '10px', verticalAlign: 'top' }}>
-                          <input value={item.name} onChange={(e) => handleUpdateItem(idx, 'name', e.target.value)} style={{ fontWeight: 600, color: '#262626', width: '100%', background: '#f9f9f9', borderBottom: '1px solid transparent', padding: '4px' }} placeholder="Nombre del equipo" />
-                          <textarea value={item.desc} onChange={(e) => handleUpdateItem(idx, 'desc', e.target.value)} rows="2" style={{ fontSize: '11px', color: '#7f7f7f', width: '100%', resize: 'none', marginTop: '4px', background: '#f9f9f9', padding: '4px', border: '1px solid transparent', borderRadius: '4px' }} placeholder="Descripción..."></textarea>
+                        <td className="desc-cell" style={{ padding: '12px 10px', verticalAlign: 'top' }}>
+                          <input value={item.name} onChange={(e) => handleUpdateItem(idx, 'name', e.target.value)} style={{ fontWeight: 600, color: '#262626', width: '100%', background: '#f9f9f9', borderBottom: '1px solid transparent', padding: '6px 8px', fontSize: '14px', borderRadius: '4px' }} placeholder="Nombre del equipo" />
+                          <textarea value={item.desc} onChange={(e) => handleUpdateItem(idx, 'desc', e.target.value)} rows="4" style={{ fontSize: '12px', color: '#555555', width: '100%', resize: 'none', marginTop: '6px', background: '#f9f9f9', padding: '6px 8px', border: '1px solid transparent', borderRadius: '4px', lineHeight: '1.4' }} placeholder="Descripción..."></textarea>
                         </td>
                         <td data-label="Cant." style={{ padding: '10px', verticalAlign: 'top', textAlign: 'center' }}>
                           <input type="text" inputMode="numeric" pattern="[0-9]*" value={item.qty} onChange={(e) => handleUpdateItem(idx, 'qty', e.target.value)} style={{ width: '100%', boxSizing: 'border-box', textAlign: 'center', background: '#f7f7f7', border: '1px solid #e5e5e5', borderRadius: '4px', padding: '6px', fontWeight: 600 }} />
